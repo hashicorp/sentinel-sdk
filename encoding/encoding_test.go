@@ -17,14 +17,14 @@ func TestEncoding(t *testing.T) {
 			}
 
 			// Determine the expected type and value. This is just the
-			// value set to tc.Expected unless we wrap it in nilType. We
+			// value set to tc.Expected unless we wrap it in targetType. We
 			// use that wrapper to signal that we want to set the typ to nil
 			// to force automatic type inference and test that.
 			typ := reflect.ValueOf(tc.Expected).Type()
 			expected := tc.Expected
-			if n, ok := expected.(nilType); ok {
+			if n, ok := expected.(targetType); ok {
 				expected = n.Expected
-				typ = nil
+				typ = n.Type
 			}
 
 			// Value => Go
@@ -45,10 +45,13 @@ func TestEncoding(t *testing.T) {
 	}
 }
 
-// nilType is a wrapper struct that can be put around Expected values
+// targetType is a wrapper struct that can be put around Expected values
 // in the table below to signal that the test should run with the "typ"
 // parameter set to nil. This will force the Go conversion to enforce the type.
-type nilType struct{ Expected interface{} }
+type targetType struct {
+	Type     reflect.Type // can be nil to automatically infer
+	Expected interface{}
+}
 
 // encodingTests are the test cases for all encodings
 var encodingTests = []struct {
@@ -92,10 +95,26 @@ var encodingTests = []struct {
 			"foo": 42,
 			"bar": 21,
 		},
-		nilType{Expected: map[string]int{
+		targetType{Expected: map[string]int64{
 			"foo": 42,
 			"bar": 21,
 		}},
+		false,
+	},
+
+	{
+		"map with interface type",
+		map[string]interface{}{
+			"foo": 42,
+			"bar": 21,
+		},
+		targetType{
+			Type: interfaceTyp,
+			Expected: map[string]int64{
+				"foo": 42,
+				"bar": 21,
+			},
+		},
 		false,
 	},
 

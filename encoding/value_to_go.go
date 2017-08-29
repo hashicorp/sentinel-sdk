@@ -12,7 +12,7 @@ import (
 var (
 	interfaceTyp = reflect.TypeOf((*interface{})(nil)).Elem()
 	boolTyp      = reflect.TypeOf(true)
-	intTyp       = reflect.TypeOf(int(0))
+	intTyp       = reflect.TypeOf(int64(0))
 	floatTyp     = reflect.TypeOf(float64(0))
 	stringTyp    = reflect.TypeOf("")
 )
@@ -53,7 +53,7 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 	}
 
 	// If the type is nil, we set a default based on the kind
-	if t == nil {
+	if t == nil || t.Kind() == reflect.Interface {
 		switch kind {
 		case reflect.Bool:
 			t = boolTyp
@@ -222,6 +222,10 @@ func convertValueSlice(raw *proto.Value, t reflect.Type) (interface{}, error) {
 func convertValueMap(raw *proto.Value, t reflect.Type) (interface{}, error) {
 	if raw.Type != proto.Value_MAP {
 		return nil, convertErr(raw, "map")
+	}
+
+	if t.Kind() != reflect.Map {
+		return nil, fmt.Errorf("target type is not map, is: %s", t.Kind())
 	}
 
 	m := raw.Value.(*proto.Value_ValueMap).ValueMap
