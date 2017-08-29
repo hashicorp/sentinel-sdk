@@ -1,0 +1,115 @@
+syntax = "proto3";
+package proto;
+
+//-------------------------------------------------------------------
+// Import Service
+
+// Import is the RPC service that must be implemented by a valid import
+// for Sentinel. Sentinel can then consume this import.
+service Import {
+    rpc Configure(Configure.Request) returns (Configure.Response);
+    rpc Get(Get.MultiRequest) returns (Get.MultiResponse);
+    rpc Close(Close.Request) returns (Empty);
+}
+
+// Empty is just an empty message.
+message Empty {}
+
+// Configure are the structures for Import.Configure
+message Configure {
+    message Request {
+        Value config = 3;
+    }
+
+    message Response {
+        uint64 instance_id = 1;
+    }
+}
+
+// Get are the structures for an Import.Get.
+message Get {
+    // Request is a single request for a Get.
+    message Request {
+        uint64 instance_id = 1;
+        uint64 exec_id = 2;
+        uint64 exec_deadline = 3;
+        repeated string keys = 4;
+        uint64 key_id = 5;
+        bool call = 6;
+        repeated Value args = 7;
+    }
+
+    // Response is a single response for a Get.
+    message Response {
+        uint64 instance_id = 1;
+        uint64 key_id = 2;
+        repeated string keys = 3;
+        Value value = 4;
+    }
+
+    // MultiRequest allows multiple requests in a single Get.
+    message MultiRequest {
+        repeated Request requests = 1;
+    }
+
+    // MultiResponse allows multiple responses in a single Get.
+    message MultiResponse {
+        repeated Response responses = 1;
+    }
+}
+
+// Close contains the structures for Close RPC calls.
+message Close {
+    message Request {
+        uint64 instance_id = 1;
+    }
+}
+
+//-------------------------------------------------------------------
+// Sentinel Values
+
+// Value represents a Sentinel value.
+message Value {
+    // Type is an enum representing the type of the value. This isn't the
+    // full set of Sentinel types since some types cannot be sent via
+    // Protobufs such as rules or functions.
+    enum Type {
+        INVALID   = 0;
+        UNDEFINED = 1;
+        NULL      = 2;
+        BOOL      = 3;
+        INT       = 4;
+        FLOAT     = 5;
+        STRING    = 6;
+        LIST      = 7;
+        MAP       = 8;
+    }
+
+    message KV {
+        Value key = 1;
+        Value value = 2;
+    }
+
+    message Map {
+        repeated KV elems = 1;
+    }
+
+    message List {
+        repeated Value elems = 1;
+    }
+
+    // type is the type of this value
+    Type type = 1;
+
+    // value is the value only if the type is not UNDEFINED or NULL.
+    // If the value is UNDEFINED or NULL, then the value is known.
+    oneof value {
+        bool value_bool = 2;
+        int64 value_int = 3;
+        double value_float = 4;
+        string value_string = 5;
+        List value_list = 6;
+        Map value_map = 7;
+    }
+}
+
