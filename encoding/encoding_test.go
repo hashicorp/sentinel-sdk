@@ -143,6 +143,23 @@ var encodingTests = []struct {
 	},
 
 	{
+		"slice to nil type",
+		[]int32{1, 2, 3, 4},
+		targetType{Expected: []int64{1, 2, 3, 4}},
+		false,
+	},
+
+	{
+		"slice with interface type",
+		[]int32{1, 2, 3, 4},
+		targetType{
+			Type:     interfaceTyp,
+			Expected: []int64{1, 2, 3, 4},
+		},
+		false,
+	},
+
+	{
 		"slice to incompatible slice type",
 		[]int32{1, 2, 3, 4},
 		[]bool{},

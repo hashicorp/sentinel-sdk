@@ -47,6 +47,9 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 		case proto.Value_MAP:
 			kind = reflect.Map
 
+		case proto.Value_LIST:
+			kind = reflect.Slice
+
 		default:
 			return nil, convertErr(v, "interface{}")
 		}
@@ -69,6 +72,9 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 
 		case reflect.Map:
 			t = valueMapType(v)
+
+		case reflect.Slice:
+			t = valueSliceType(v)
 
 		default:
 			return nil, convertErr(v, "nil type")
@@ -263,6 +269,12 @@ func valueMapType(raw *proto.Value) reflect.Type {
 	}
 
 	return reflect.MapOf(elemType(keys), elemType(values))
+}
+
+// valueSliceType creates a slice type to match the keys/values in the value.
+func valueSliceType(raw *proto.Value) reflect.Type {
+	list := raw.Value.(*proto.Value_ValueList).ValueList
+	return reflect.SliceOf(elemType(list.Elems))
 }
 
 // elemTyp determines the least common type for a set of values, defaulting
