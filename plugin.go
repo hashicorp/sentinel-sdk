@@ -9,8 +9,12 @@ import (
 	"time"
 )
 
-// TODO: make a real unique, this is just temporary
-var Undefined = 42
+type undefined struct{}
+
+// Undefined is a constant value that represents the undefined object in
+// Sentinel. By making this the return value, it'll be converted to
+// Undefined.
+var Undefined = &undefined{}
 
 //go:generate rm -f mock_Import.go
 //go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Import

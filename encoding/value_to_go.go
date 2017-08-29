@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/proto/go"
 )
 
@@ -109,6 +110,13 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 
 	case reflect.Map:
 		return convertValueMap(v, t)
+
+	case reflect.Ptr:
+		if v.Type == proto.Value_UNDEFINED {
+			return sdk.Undefined, nil
+		}
+
+		fallthrough
 
 	default:
 		return nil, convertErr(v, t.Kind().String())

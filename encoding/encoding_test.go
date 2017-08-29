@@ -3,6 +3,8 @@ package encoding
 import (
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/sentinel-sdk"
 )
 
 func TestEncoding(t *testing.T) {
@@ -323,6 +325,16 @@ var encodingTests = []struct {
 		"string to string",
 		`42`,
 		`42`,
+		false,
+	},
+
+	//-----------------------------------------------------------
+	// Undefined
+
+	{
+		"undefined to undefined",
+		sdk.Undefined,
+		sdk.Undefined,
 		false,
 	},
 }

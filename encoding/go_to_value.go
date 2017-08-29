@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/proto/go"
 )
 
@@ -34,6 +35,10 @@ func toValue_reflect(v reflect.Value) (*proto.Value, error) {
 		return toValue_reflect(v.Elem())
 
 	case reflect.Ptr:
+		if v.Interface() == sdk.Undefined {
+			return &proto.Value{Type: proto.Value_UNDEFINED}, nil
+		}
+
 		return toValue_reflect(v.Elem())
 
 	case reflect.Bool:
@@ -143,7 +148,7 @@ func toValue_struct(v reflect.Value) (*proto.Value, error) {
 	// field tags, etc.
 	t := v.Type()
 
-	vs := make([]*proto.Value_KV, v.Len())
+	vs := make([]*proto.Value_KV, v.NumField())
 	for i := range vs {
 		field := t.Field(i)
 
