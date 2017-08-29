@@ -20,6 +20,8 @@ import (
 	"github.com/hashicorp/sentinel-sdk/encoding"
 )
 
+var stringTyp = reflect.TypeOf("")
+
 // Import implements sdk.Import. Configure and return this structure
 // to simplify implementation of sdk.Import.
 type Import struct {
@@ -99,8 +101,20 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 			case map[string]interface{}:
 				result = x[k]
 
-			// For any other type, the result is undefined
+			// Else...
 			default:
+				// If it is a map with reflection with a string key,
+				// then access it.
+				v := reflect.ValueOf(x)
+				if v.Kind() == reflect.Map && v.Type().Key() == stringTyp {
+					// If the value exists within the map, set it to the value
+					if v = v.MapIndex(reflect.ValueOf(k)); v.IsValid() {
+						result = v.Interface()
+						break
+					}
+				}
+
+				// Finally, its undefined
 				result = nil
 			}
 

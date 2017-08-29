@@ -204,6 +204,54 @@ func TestImportGet(t *testing.T) {
 		},
 
 		{
+			"key get map value with specific type",
+			&rootEmbedNamespace{&nsKeyValue{
+				Key: "foo",
+				Value: map[string]int64{
+					"child": 84,
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys:  []string{"foo", "child"},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo", "child"},
+					KeyId: 42,
+					Value: int64(84),
+				},
+			},
+			false,
+		},
+
+		{
+			"key get missing map value with specific type",
+			&rootEmbedNamespace{&nsKeyValue{
+				Key: "foo",
+				Value: map[string]int64{
+					"child": 84,
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys:  []string{"foo", "nope"},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo", "nope"},
+					KeyId: 42,
+					Value: undefined,
+				},
+			},
+			false,
+		},
+
+		{
 			"key get map value that is a namespace",
 			&rootEmbedNamespace{&nsKeyValue{
 				Key: "foo",
