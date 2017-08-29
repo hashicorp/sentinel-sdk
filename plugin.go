@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+// TODO: make a real unique, this is just temporary
+var Undefined = 42
+
 //go:generate rm -f mock_Import.go
 //go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Import
 
