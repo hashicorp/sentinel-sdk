@@ -16,8 +16,18 @@ func TestEncoding(t *testing.T) {
 				t.Fatalf("GoToValue err: %s", err)
 			}
 
-			// Value => Go
+			// Determine the expected type and value. This is just the
+			// value set to tc.Expected unless we wrap it in nilType. We
+			// use that wrapper to signal that we want to set the typ to nil
+			// to force automatic type inference and test that.
 			typ := reflect.ValueOf(tc.Expected).Type()
+			expected := tc.Expected
+			if n, ok := expected.(nilType); ok {
+				expected = n.Expected
+				typ = nil
+			}
+
+			// Value => Go
 			actual, err := ValueToGo(value, typ)
 			if err != nil {
 				if tc.Err {
@@ -28,12 +38,17 @@ func TestEncoding(t *testing.T) {
 			}
 
 			// It should be what we expect
-			if !reflect.DeepEqual(actual, tc.Expected) {
+			if !reflect.DeepEqual(actual, expected) {
 				t.Fatalf("bad: %#v", actual)
 			}
 		})
 	}
 }
+
+// nilType is a wrapper struct that can be put around Expected values
+// in the table below to signal that the test should run with the "typ"
+// parameter set to nil. This will force the Go conversion to enforce the type.
+type nilType struct{ Expected interface{} }
 
 // encodingTests are the test cases for all encodings
 var encodingTests = []struct {
@@ -68,6 +83,19 @@ var encodingTests = []struct {
 			"foo": int64(42),
 			"bar": int64(21),
 		},
+		false,
+	},
+
+	{
+		"map with nil type",
+		map[string]interface{}{
+			"foo": 42,
+			"bar": 21,
+		},
+		nilType{Expected: map[string]int{
+			"foo": 42,
+			"bar": 21,
+		}},
 		false,
 	},
 

@@ -10,10 +10,11 @@ import (
 )
 
 var (
-	boolTyp   = reflect.TypeOf(true)
-	intTyp    = reflect.TypeOf(int(0))
-	floatTyp  = reflect.TypeOf(float64(0))
-	stringTyp = reflect.TypeOf("")
+	interfaceTyp = reflect.TypeOf((*interface{})(nil)).Elem()
+	boolTyp      = reflect.TypeOf(true)
+	intTyp       = reflect.TypeOf(int(0))
+	floatTyp     = reflect.TypeOf(float64(0))
+	stringTyp    = reflect.TypeOf("")
 )
 
 // ValueToGo converts a protobuf Value structure to a native Go value.
@@ -43,6 +44,9 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 		case proto.Value_STRING:
 			kind = reflect.String
 
+		case proto.Value_MAP:
+			kind = reflect.Map
+
 		default:
 			return nil, convertErr(v, "interface{}")
 		}
@@ -62,6 +66,9 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 
 		case reflect.String:
 			t = stringTyp
+
+		case reflect.Map:
+			t = valueMapType(v)
 
 		default:
 			return nil, convertErr(v, "nil type")
@@ -239,6 +246,54 @@ func convertValueMap(raw *proto.Value, t reflect.Type) (interface{}, error) {
 	}
 
 	return mapVal.Interface(), nil
+}
+
+// valueMapType creates a map type to match the keys/values in the value.
+func valueMapType(raw *proto.Value) reflect.Type {
+	m := raw.Value.(*proto.Value_ValueMap).ValueMap
+	var keys []*proto.Value
+	var values []*proto.Value
+	for _, elt := range m.Elems {
+		keys = append(keys, elt.Key)
+		values = append(values, elt.Value)
+	}
+
+	return reflect.MapOf(elemType(keys), elemType(values))
+}
+
+// elemTyp determines the least common type for a set of values, defaulting
+// to interface{} as the most generic type.
+func elemType(vs []*proto.Value) reflect.Type {
+	current := proto.Value_INVALID
+	for _, v := range vs {
+		// If we haven't set a type yet, set it to this one
+		if current == proto.Value_INVALID {
+			current = v.Type
+		}
+
+		// If the types don't match, we have an interface type
+		if current != v.Type {
+			return interfaceTyp
+		}
+	}
+
+	// We found a matching type, return the type based on the proto type
+	switch current {
+	case proto.Value_BOOL:
+		return boolTyp
+
+	case proto.Value_INT:
+		return intTyp
+
+	case proto.Value_FLOAT:
+		return floatTyp
+
+	case proto.Value_STRING:
+		return stringTyp
+
+	default:
+		return interfaceTyp
+	}
 }
 
 func convertErr(raw *proto.Value, t string) error {
