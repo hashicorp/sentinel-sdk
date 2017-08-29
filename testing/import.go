@@ -27,6 +27,11 @@ type TestImportCase struct {
 	// in `main = ` and an assignment. For example `main = subject.foo`.
 	Source string
 
+	// This is the configuration that will be sent to the plugin. This
+	// must serialize to JSON since the JSON will be used to pass the
+	// configuration.
+	Config map[string]interface{}
+
 	// ImportPath is the path to a Go package on your GOPATH containing
 	// the import to test. If this is blank, the test case uses heuristics
 	// to extract the GOPATH and use the current package for testing.
@@ -76,7 +81,8 @@ func TestImport(t testing.T, c TestImportCase) {
 	config, err := json.MarshalIndent(map[string]interface{}{
 		"imports": map[string]interface{}{
 			"subject": map[string]interface{}{
-				"path": binaryPath,
+				"path":   binaryPath,
+				"config": c.Config,
 			},
 		},
 	}, "", "\t")

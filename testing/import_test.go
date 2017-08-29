@@ -36,4 +36,13 @@ func TestTestImport(t *testing.T) {
 			Source:     `main = subject.foo == "foo!"`,
 		})
 	})
+
+	// Test configuration
+	t.Run("config", func(t *testing.T) {
+		TestImport(t, TestImportCase{
+			ImportPath: path,
+			Config:     map[string]interface{}{"suffix": "??"},
+			Source:     `main = subject.foo == "foo??"`,
+		})
+	})
 }

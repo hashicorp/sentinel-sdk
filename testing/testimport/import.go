@@ -14,14 +14,25 @@ func New() sdk.Import {
 	}
 }
 
-type root struct{}
+type root struct {
+	suffix string
+}
 
 // framework.Root impl.
 func (m *root) Configure(raw map[string]interface{}) error {
+	if v, ok := raw["suffix"]; ok {
+		m.suffix = v.(string)
+	}
+
 	return nil
 }
 
 // framework.Namespace impl.
 func (m *root) Get(key string) (interface{}, error) {
-	return key + "!!", nil
+	suffix := m.suffix
+	if suffix == "" {
+		suffix = "!!"
+	}
+
+	return key + suffix, nil
 }
