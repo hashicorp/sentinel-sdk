@@ -168,6 +168,9 @@ func convertValueFloat(raw *proto.Value, bitSize int) (interface{}, error) {
 	case proto.Value_INT:
 		return float64(raw.Value.(*proto.Value_ValueInt).ValueInt), nil
 
+	case proto.Value_FLOAT:
+		return raw.Value.(*proto.Value_ValueFloat).ValueFloat, nil
+
 	case proto.Value_STRING:
 		return strconv.ParseFloat(raw.Value.(*proto.Value_ValueString).ValueString, bitSize)
 
