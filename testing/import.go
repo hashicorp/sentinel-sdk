@@ -20,6 +20,7 @@ import (
 // importMap is the list of built import binaries keyed by import path.
 // This import path should be canonicalized via ImportPath.
 var importMap = map[string]string{}
+var importErr = map[string]error{}
 
 // TestImportCase is a single test case for configuring TestImport.
 type TestImportCase struct {
@@ -52,6 +53,11 @@ func TestImport(t testing.T, c TestImportCase) {
 	path, err := ImportPath(c.ImportPath)
 	if err != nil {
 		t.Fatalf("error inferring GOPATH: %s", err)
+	}
+
+	// If we already errored building this, report it
+	if err, ok := importErr[path]; ok {
+		t.Fatalf("error building import: %s", err)
 	}
 
 	// Get the path to the built import, or build it
@@ -160,6 +166,7 @@ func buildImport(t testing.T, path string) string {
 	cmd.Dir = td
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		importErr[path] = err
 		t.Fatalf("err building the test binary. output:\n\n%s", string(output))
 	}
 
