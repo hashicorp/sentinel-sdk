@@ -10,11 +10,18 @@ import (
 )
 
 type undefined struct{}
+type null struct{}
 
-// Undefined is a constant value that represents the undefined object in
-// Sentinel. By making this the return value, it'll be converted to
-// Undefined.
-var Undefined = &undefined{}
+var (
+	// Undefined is a constant value that represents the undefined object in
+	// Sentinel. By making this the return value, it'll be converted to
+	// Undefined.
+	Undefined = &undefined{}
+
+	// Null is a constant value that represents the null object in Sentinel.
+	// By making this a return value, it will convert to null.
+	Null = &null{}
+)
 
 //go:generate rm -f mock_Import.go
 //go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Import

@@ -35,7 +35,11 @@ func toValue_reflect(v reflect.Value) (*proto.Value, error) {
 		return toValue_reflect(v.Elem())
 
 	case reflect.Ptr:
-		if v.Interface() == sdk.Undefined {
+		switch v.Interface() {
+		case sdk.Null:
+			return &proto.Value{Type: proto.Value_NULL}, nil
+
+		case sdk.Undefined:
 			return &proto.Value{Type: proto.Value_UNDEFINED}, nil
 		}
 

@@ -50,6 +50,9 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 		case proto.Value_LIST:
 			kind = reflect.Slice
 
+		case proto.Value_NULL:
+			return sdk.Null, nil
+
 		case proto.Value_UNDEFINED:
 			return sdk.Undefined, nil
 
@@ -128,7 +131,11 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 		return convertValueMap(v, t)
 
 	case reflect.Ptr:
-		if v.Type == proto.Value_UNDEFINED {
+		switch v.Type {
+		case proto.Value_NULL:
+			return sdk.Null, nil
+
+		case proto.Value_UNDEFINED:
 			return sdk.Undefined, nil
 		}
 

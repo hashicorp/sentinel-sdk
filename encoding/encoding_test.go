@@ -393,6 +393,23 @@ var encodingTests = []struct {
 	},
 
 	//-----------------------------------------------------------
+	// Bool
+
+	{
+		"null to null",
+		sdk.Null,
+		sdk.Null,
+		false,
+	},
+
+	{
+		"null to nil type",
+		sdk.Null,
+		targetType{Expected: sdk.Null},
+		false,
+	},
+
+	//-----------------------------------------------------------
 	// Undefined
 
 	{
