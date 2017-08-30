@@ -1,11 +1,18 @@
 package testing
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	testingiface "github.com/mitchellh/go-testing-interface"
 )
+
+func TestMain(m *testing.M) {
+	exitCode := m.Run()
+	Clean()
+	os.Exit(exitCode)
+}
 
 func TestTestImport(t *testing.T) {
 	path, err := filepath.Abs("testimport")

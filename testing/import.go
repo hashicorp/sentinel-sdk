@@ -19,6 +19,7 @@ import (
 
 // importMap is the list of built import binaries keyed by import path.
 // This import path should be canonicalized via ImportPath.
+var importBuildDir string
 var importMap = map[string]string{}
 var importErr = map[string]error{}
 
@@ -45,6 +46,19 @@ type TestImportCase struct {
 	// For a given import path, the test binary will be built exactly once
 	// per test run.
 	ImportPath string
+}
+
+// Clean cleans any temporary files created. This should always be called
+// at the end of any set of import tests.
+func Clean() {
+	// Delete our build directory
+	if importBuildDir != "" {
+		os.RemoveAll(importBuildDir)
+	}
+
+	// Reset all globals
+	importMap = map[string]string{}
+	importErr = map[string]error{}
 }
 
 // TestImport tests that a sdk.Import implementation works as expected.
@@ -150,8 +164,23 @@ func buildImport(t testing.T, path string) string {
 		MustAsset("data/main.go.tpl"),
 		[]byte("PATH"), []byte(path), -1)
 
-	// Create the directory to compile this
-	td, err := ioutil.TempDir("", "sentinel-sdk")
+	// If we don't have a build dir, make one
+	if importBuildDir == "" {
+		// Create the directory to compile this
+		wd, err := os.Getwd()
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		td, err := ioutil.TempDir(wd, "sentinel-sdk")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		importBuildDir = td
+	}
+
+	// Create the build dir for this import
+	td, err := ioutil.TempDir(importBuildDir, "sentinel-sdk")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
