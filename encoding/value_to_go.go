@@ -50,6 +50,9 @@ func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 		case proto.Value_LIST:
 			kind = reflect.Slice
 
+		case proto.Value_UNDEFINED:
+			return sdk.Undefined, nil
+
 		default:
 			return nil, convertErr(v, "interface{}")
 		}

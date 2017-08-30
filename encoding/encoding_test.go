@@ -401,4 +401,11 @@ var encodingTests = []struct {
 		sdk.Undefined,
 		false,
 	},
+
+	{
+		"undefined to nil type",
+		sdk.Undefined,
+		targetType{Expected: sdk.Undefined},
+		false,
+	},
 }
