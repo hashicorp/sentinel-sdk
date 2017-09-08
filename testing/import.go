@@ -34,6 +34,13 @@ type TestImportCase struct {
 	// configuration.
 	Config map[string]interface{}
 
+	// This is extra data to inject into the global scope of the policy
+	// execution
+	Global map[string]interface{}
+
+	// Mock is mocked import data
+	Mock map[string]map[string]interface{}
+
 	// ImportPath is the path to a Go package on your GOPATH containing
 	// the import to test. If this is blank, the test case uses heuristics
 	// to extract the GOPATH and use the current package for testing.
@@ -105,6 +112,8 @@ func TestImport(t testing.T, c TestImportCase) {
 				"config": c.Config,
 			},
 		},
+		"global": c.Global,
+		"mock":   c.Mock,
 	}, "", "\t")
 	if err != nil {
 		t.Fatalf("err: %s", err)
