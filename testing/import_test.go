@@ -52,4 +52,27 @@ func TestTestImport(t *testing.T) {
 			Source:     `main = subject.foo == "foo??"`,
 		})
 	})
+
+	// Test globals
+	t.Run("global", func(t *testing.T) {
+		TestImport(t, TestImportCase{
+			ImportPath: path,
+			Global:     map[string]interface{}{"value": "foo??"},
+			Source:     `main = value == "foo??"`,
+		})
+	})
+
+	// Test mocks
+	t.Run("mock", func(t *testing.T) {
+		TestImport(t, TestImportCase{
+			ImportPath: path,
+			Mock: map[string]map[string]interface{}{
+				"data": map[string]interface{}{
+					"value": "foo??",
+				},
+			},
+			Source: `import "data"; main = data.value == "foo??"`,
+		})
+	})
+
 }
