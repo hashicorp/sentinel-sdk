@@ -136,6 +136,58 @@ func TestImportGet(t *testing.T) {
 		},
 
 		{
+			"key get map",
+			&rootEmbedNamespace{&nsKeyValue{
+				Key: "foo",
+				Value: map[string]interface{}{
+					"bar": 42,
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+					Value: map[string]interface{}{
+						"bar": 42,
+					},
+				},
+			},
+			false,
+		},
+
+		{
+			"key get map with nil value",
+			&rootEmbedNamespace{&nsKeyValue{
+				Key: "foo",
+				Value: map[string]interface{}{
+					"bar": nil,
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+					Value: map[string]interface{}{
+						"bar": nil,
+					},
+				},
+			},
+			false,
+		},
+
+		{
 			"key get invalid",
 			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: "bar"}},
 			[]*sdk.GetReq{

@@ -118,6 +118,17 @@ var encodingTests = []struct {
 		false,
 	},
 
+	{
+		"map with null value",
+		map[string]interface{}{
+			"foo": nil,
+		},
+		map[string]interface{}{
+			"foo": sdk.Null,
+		},
+		false,
+	},
+
 	//-----------------------------------------------------------
 	// Slice
 
