@@ -1,6 +1,7 @@
 package framework
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"sync/atomic"
@@ -91,11 +92,11 @@ func TestImportGet(t *testing.T) {
 	undefined := sdk.Undefined
 
 	cases := []struct {
-		Name string
-		Root Root
-		Req  []*sdk.GetReq
-		Resp []*sdk.GetResult
-		Err  bool
+		Name        string
+		Root        Root
+		Req         []*sdk.GetReq
+		Resp        []*sdk.GetResult
+		ExpectedErr string
 	}{
 		{
 			"key get",
@@ -113,7 +114,7 @@ func TestImportGet(t *testing.T) {
 					Value: "bar",
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -132,7 +133,7 @@ func TestImportGet(t *testing.T) {
 					Value: undefined,
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -158,7 +159,7 @@ func TestImportGet(t *testing.T) {
 					},
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -184,7 +185,7 @@ func TestImportGet(t *testing.T) {
 					},
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -203,7 +204,7 @@ func TestImportGet(t *testing.T) {
 					Value: undefined,
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -228,7 +229,7 @@ func TestImportGet(t *testing.T) {
 					Value: "bar",
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -252,7 +253,7 @@ func TestImportGet(t *testing.T) {
 					Value: "bar",
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -276,7 +277,7 @@ func TestImportGet(t *testing.T) {
 					Value: int64(84),
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -300,7 +301,7 @@ func TestImportGet(t *testing.T) {
 					Value: undefined,
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -332,7 +333,7 @@ func TestImportGet(t *testing.T) {
 					},
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -370,7 +371,7 @@ func TestImportGet(t *testing.T) {
 					},
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -402,7 +403,7 @@ func TestImportGet(t *testing.T) {
 					},
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -427,7 +428,7 @@ func TestImportGet(t *testing.T) {
 					Value: undefined,
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -460,7 +461,7 @@ func TestImportGet(t *testing.T) {
 					Value: "barvalue",
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -490,7 +491,7 @@ func TestImportGet(t *testing.T) {
 					},
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -516,7 +517,7 @@ func TestImportGet(t *testing.T) {
 					Value: "asdf",
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -542,7 +543,7 @@ func TestImportGet(t *testing.T) {
 					Value: "42",
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -570,7 +571,7 @@ func TestImportGet(t *testing.T) {
 					},
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -586,7 +587,7 @@ func TestImportGet(t *testing.T) {
 				},
 			},
 			nil,
-			true,
+			`key "foo" doesn't support function calls`,
 		},
 
 		{
@@ -612,7 +613,7 @@ func TestImportGet(t *testing.T) {
 					Value: "asdf",
 				},
 			},
-			false,
+			"",
 		},
 
 		{
@@ -630,7 +631,7 @@ func TestImportGet(t *testing.T) {
 				},
 			},
 			nil,
-			true,
+			`error calling function "foo": expected 1 arguments, got 0`,
 		},
 
 		{
@@ -650,7 +651,54 @@ func TestImportGet(t *testing.T) {
 				},
 			},
 			nil,
-			true,
+			`error calling function "foo": expected 1 arguments, got 2`,
+		},
+
+		{
+			"multi-level key call error message",
+			&rootEmbedNamespace{&nsKeyValue{
+				Key: "foo",
+				Value: &nsCall{
+					F: func() (interface{}, error) {
+						return "", fmt.Errorf("foo")
+					},
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys:  []string{"foo", "bar"},
+					KeyId: 42,
+					Args:  []interface{}{},
+				},
+			},
+			nil,
+			`error calling function "foo.bar": foo`,
+		},
+
+		{
+			"bad get",
+			&rootEmbedNamespace{&nsGetErr{}},
+			[]*sdk.GetReq{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+				},
+			},
+			nil,
+			`error retrieving key "foo": get error`,
+		},
+
+		{
+			"bad map",
+			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: &nsMapErr{}}},
+			[]*sdk.GetReq{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+				},
+			},
+			nil,
+			`error retrieving key "foo": map error`,
 		},
 	}
 
@@ -668,11 +716,14 @@ func TestImportGet(t *testing.T) {
 
 			// Perform the req
 			actual, err := impt.Get(tc.Req)
-			if (err != nil) != tc.Err {
-				t.Fatalf("err: %s", err)
-			}
 			if err != nil {
-				return
+				if tc.ExpectedErr != "" {
+					if err.Error() != tc.ExpectedErr {
+						t.Fatalf("expected error to be %q, got %q", tc.ExpectedErr, err.Error())
+					}
+				} else {
+					t.Fatalf("err: %s", err)
+				}
 			}
 
 			// Compare the response
@@ -745,6 +796,17 @@ func (v *nsCall) Get(key string) (interface{}, error) {
 	return nil, fmt.Errorf("can't get")
 }
 
+// nsGetErr implements Namespace and just stubs an error response.
+type nsGetErr struct{}
+
+func (v *nsGetErr) Get(string) (interface{}, error) { return nil, errors.New("get error") }
+
+// nsvMapErr implements a Map Namespace and just stubs an error response.
+type nsMapErr struct{}
+
+func (v *nsMapErr) Get(string) (interface{}, error)      { return map[string]interface{}{}, nil }
+func (v *nsMapErr) Map() (map[string]interface{}, error) { return nil, errors.New("map error") }
+
 // Test Get with a Root that implements NamespaceCreator.
 func TestImportGet_namespaceCreator(t *testing.T) {
 	impt := &Import{
@@ -798,7 +860,7 @@ func TestImportGet_namespaceCreator(t *testing.T) {
 			},
 		}
 		if !reflect.DeepEqual(actual, expected) {
-			t.Fatalf("bad: %s", actual)
+			t.Fatalf("expected %#v, got %#v", expected, actual)
 		}
 	}
 }
