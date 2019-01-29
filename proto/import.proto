@@ -9,11 +9,11 @@ package proto;
 service Import {
     rpc Configure(Configure.Request) returns (Configure.Response);
     rpc Get(Get.MultiRequest) returns (Get.MultiResponse);
-    rpc Close(Close.Request) returns (Empty);
+    rpc Close(Close.Request) returns (EmptyResp);
 }
 
 // Empty is just an empty message.
-message Empty {}
+message EmptyResp {}
 
 // Configure are the structures for Import.Configure
 message Configure {
