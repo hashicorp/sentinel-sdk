@@ -131,10 +131,55 @@ func TestImport(t testing.T, c TestImportCase) {
 	}
 }
 
+// importPathModule determines the import path when modules are
+// enabled, through the use of "go list".
+//
+// The working directory is set to dir, if supplied.
+func importPathModule(dir string) (string, error) {
+	cmd := exec.Command("go", "list")
+	if dir != "" {
+		wd, err := filepath.Abs(dir)
+		if err != nil {
+			return "", err
+		}
+
+		cmd.Dir = wd
+	}
+
+	out, err := cmd.Output()
+	if err != nil {
+		if e, ok := err.(*exec.ExitError); ok {
+			log.Println(string(e.Stderr))
+		}
+
+		return "", err
+	}
+
+	return strings.TrimSpace(string(out)), nil
+}
+
+// isUsingModules checks to see if modules are enabled on the working
+// repository.
+func isUsingModules() bool {
+	if err := exec.Command("go", "list", "-m").Run(); err != nil {
+		if e, ok := err.(*exec.ExitError); ok {
+			// Log stderr if we have it
+			log.Println(strings.TrimSpace(string(e.Stderr)))
+		}
+
+		return false
+	}
+
+	return true
+}
+
 // ImportPath attempts to infer the import path based on the GOPATH
 // environment variable and the directory.
 func ImportPath(dir string) (string, error) {
-	// Get the GOPATH
+	if isUsingModules() {
+		return importPathModule(dir)
+	}
+
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
 		return "", errors.New("no GOPATH set")
