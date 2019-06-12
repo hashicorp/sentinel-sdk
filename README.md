@@ -11,3 +11,13 @@ can be written by implementing the [protocol](https://github.com/hashicorp/senti
 
 To get started writing a Sentinel import, we recommend reading the
 [extending Sentinel](https://docs.hashicorp.com/sentinel/extending/dev) guide.
+
+## License
+
+```
+Copyright 2019 HashiCorp
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+```
