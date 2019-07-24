@@ -58,48 +58,44 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 		// Get the namespace
 		ns := m.namespace(req)
 
-		// Is this a call?
-		call := req.Args != nil
-
 		// For each key, perform a get
 		var result interface{} = ns
 		for i, k := range req.Keys {
-			// If this is the last key in a call, then we have to perform
-			// the actual function call here.
-			if call && i == len(req.Keys)-1 {
+			// If we have arguments at this level, perform a function call.
+			if k.Call() {
 				x, ok := result.(Call)
 				if !ok {
 					return nil, fmt.Errorf(
 						"key %q doesn't support function calls",
-						strings.Join(req.Keys[:i+1], "."))
+						strings.Join(req.GetKeys()[:i+1], "."))
 				}
 
-				v, err := m.call(x.Func(k), req.Args)
+				v, err := m.call(x.Func(k.Key), k.Args)
 				if err != nil {
 					return nil, fmt.Errorf(
 						"error calling function %q: %s",
-						strings.Join(req.Keys[:i+1], "."), err)
+						strings.Join(req.GetKeys()[:i+1], "."), err)
 				}
 
 				result = v
-				break
+				continue
 			}
 
 			switch x := result.(type) {
 			// For namespaces, we get the next value in the chain
 			case Namespace:
-				v, err := x.Get(k)
+				v, err := x.Get(k.Key)
 				if err != nil {
 					return nil, fmt.Errorf(
 						"error retrieving key %q: %s",
-						strings.Join(req.Keys[:i+1], "."), err)
+						strings.Join(req.GetKeys()[:i+1], "."), err)
 				}
 
 				result = v
 
 			// For maps with string keys, get the value
 			case map[string]interface{}:
-				result = x[k]
+				result = x[k.Key]
 
 			// Else...
 			default:
@@ -108,7 +104,7 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 				v := reflect.ValueOf(x)
 				if v.Kind() == reflect.Map && v.Type().Key() == stringTyp {
 					// If the value exists within the map, set it to the value
-					if v = v.MapIndex(reflect.ValueOf(k)); v.IsValid() {
+					if v = v.MapIndex(reflect.ValueOf(k.Key)); v.IsValid() {
 						result = v.Interface()
 						break
 					}
@@ -130,7 +126,7 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 			if err != nil {
 				return nil, fmt.Errorf(
 					"error retrieving key %q: %s",
-					strings.Join(req.Keys, "."), err)
+					strings.Join(req.GetKeys(), "."), err)
 			}
 		}
 
@@ -141,7 +137,7 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 		if err != nil {
 			return nil, fmt.Errorf(
 				"error retrieving key %q: %s",
-				strings.Join(req.Keys, "."), err)
+				strings.Join(req.GetKeys(), "."), err)
 		}
 
 		// Convert the result based on types
@@ -152,7 +148,7 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 		// Build the actual result
 		resp[i] = &sdk.GetResult{
 			KeyId: req.KeyId,
-			Keys:  req.Keys,
+			Keys:  req.GetKeys(),
 			Value: result,
 		}
 	}

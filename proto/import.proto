@@ -31,13 +31,16 @@ message Configure {
 message Get {
     // Request is a single request for a Get.
     message Request {
+        message Key {
+          string key = 1;
+          repeated Value args = 2;
+        }
+
         uint64 instance_id = 1;
         uint64 exec_id = 2;
         uint64 exec_deadline = 3;
-        repeated string keys = 4;
+        repeated Key keys = 4;
         uint64 key_id = 5;
-        bool call = 6;
-        repeated Value args = 7;
     }
 
     // Response is a single response for a Get.

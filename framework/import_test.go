@@ -103,7 +103,9 @@ func TestImportGet(t *testing.T) {
 			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: "bar"}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -122,7 +124,9 @@ func TestImportGet(t *testing.T) {
 			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: nil}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -146,7 +150,9 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -172,7 +178,9 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -193,7 +201,9 @@ func TestImportGet(t *testing.T) {
 			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: "bar"}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"unknown"},
+					Keys: []*sdk.GetKey{
+						{Key: "unknown"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -218,7 +228,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo", "child"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+						{Key: "child"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -242,7 +255,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo", "child"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+						{Key: "child"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -266,7 +282,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo", "child"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+						{Key: "child"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -290,7 +309,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo", "nope"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+						{Key: "nope"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -318,7 +340,9 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -354,7 +378,9 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -388,7 +414,9 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -417,7 +445,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo", "unknown"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+						{Key: "unknown"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -441,11 +472,15 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 1,
 				},
 				{
-					Keys:  []string{"bar"},
+					Keys: []*sdk.GetKey{
+						{Key: "bar"},
+					},
 					KeyId: 3,
 				},
 			},
@@ -477,7 +512,9 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -503,11 +540,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
-					KeyId: 42,
-					Args: []interface{}{
-						"asdf",
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"asdf"}},
 					},
+					KeyId: 42,
 				},
 			},
 			[]*sdk.GetResult{
@@ -529,11 +565,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
-					KeyId: 42,
-					Args: []interface{}{
-						42,
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{42}},
 					},
+					KeyId: 42,
 				},
 			},
 			[]*sdk.GetResult{
@@ -555,11 +590,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
-					KeyId: 42,
-					Args: []interface{}{
-						"asdf",
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"asdf"}},
 					},
+					KeyId: 42,
 				},
 			},
 			[]*sdk.GetResult{
@@ -579,11 +613,10 @@ func TestImportGet(t *testing.T) {
 			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: "bar"}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
-					KeyId: 42,
-					Args: []interface{}{
-						"asdf",
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"asdf"}},
 					},
+					KeyId: 42,
 				},
 			},
 			nil,
@@ -599,11 +632,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
-					KeyId: 42,
-					Args: []interface{}{
-						"asdf",
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"asdf"}},
 					},
+					KeyId: 42,
 				},
 			},
 			[]*sdk.GetResult{
@@ -611,6 +643,86 @@ func TestImportGet(t *testing.T) {
 					Keys:  []string{"foo"},
 					KeyId: 42,
 					Value: "asdf",
+				},
+			},
+			"",
+		},
+
+		{
+			"multiple levels, multiple calls",
+			&rootEmbedCall{&nsCall{
+				F: func(v string) (interface{}, error) {
+					if v != "one" {
+						return nil, fmt.Errorf("expected \"one\", got %q", v)
+					}
+
+					return &nsCall{
+						F: func(a, b int) (interface{}, error) {
+							if a != 2 && b != 3 {
+								return nil, fmt.Errorf("expected: 2, 3; got: %d, %d", a, b)
+							}
+
+							return "baz", nil
+						},
+					}, nil
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"one"}},
+						{Key: "bar", Args: []interface{}{2, 3}},
+					},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo", "bar"},
+					KeyId: 42,
+					Value: "baz",
+				},
+			},
+			"",
+		},
+
+		{
+			"call, get, call",
+			&rootEmbedCall{&nsCall{
+				F: func(v string) (interface{}, error) {
+					if v != "one" {
+						return nil, fmt.Errorf("expected \"one\", got %q", v)
+					}
+
+					return &nsKeyValue{
+						Key: "bar",
+						Value: &nsCall{
+							F: func(a, b int) (interface{}, error) {
+								if a != 2 && b != 3 {
+									return nil, fmt.Errorf("expected: 2, 3; got: %d, %d", a, b)
+								}
+
+								return "qux", nil
+							},
+						},
+					}, nil
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"one"}},
+						{Key: "bar"},
+						{Key: "baz", Args: []interface{}{2, 3}},
+					},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo", "bar", "baz"},
+					KeyId: 42,
+					Value: "qux",
 				},
 			},
 			"",
@@ -625,9 +737,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{}},
+					},
 					KeyId: 42,
-					Args:  []interface{}{},
 				},
 			},
 			nil,
@@ -643,11 +756,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
-					KeyId: 42,
-					Args: []interface{}{
-						1, 2,
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{1, 2}},
 					},
+					KeyId: 42,
 				},
 			},
 			nil,
@@ -666,9 +778,10 @@ func TestImportGet(t *testing.T) {
 			}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo", "bar"},
-					KeyId: 42,
-					Args:  []interface{}{},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+						{Key: "bar", Args: []interface{}{}},
+					},
 				},
 			},
 			nil,
@@ -680,7 +793,9 @@ func TestImportGet(t *testing.T) {
 			&rootEmbedNamespace{&nsGetErr{}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
@@ -693,12 +808,78 @@ func TestImportGet(t *testing.T) {
 			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: &nsMapErr{}}},
 			[]*sdk.GetReq{
 				{
-					Keys:  []string{"foo"},
+					Keys: []*sdk.GetKey{
+						{Key: "foo"},
+					},
 					KeyId: 42,
 				},
 			},
 			nil,
 			`error retrieving key "foo": map error`,
+		},
+
+		{
+			"multi-call, error in outer",
+			&rootEmbedCall{&nsCall{
+				F: func(v string) (interface{}, error) {
+					if v != "one" {
+						return nil, fmt.Errorf("expected \"one\", got %q", v)
+					}
+
+					return &nsCall{
+						F: func(a, b int) (interface{}, error) {
+							if a != 2 && b != 3 {
+								return nil, fmt.Errorf("expected: 2, 3; got: %d, %d", a, b)
+							}
+
+							return "baz", nil
+						},
+					}, nil
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"bad"}},
+						{Key: "bar", Args: []interface{}{2, 3}},
+					},
+					KeyId: 42,
+				},
+			},
+			nil,
+			`error calling function "foo": expected "one", got "bad"`,
+		},
+
+		{
+			"multi-call, error in inner",
+			&rootEmbedCall{&nsCall{
+				F: func(v string) (interface{}, error) {
+					if v != "one" {
+						return nil, fmt.Errorf("expected \"one\", got %q", v)
+					}
+
+					return &nsCall{
+						F: func(a, b int) (interface{}, error) {
+							if a != 2 && b != 3 {
+								return nil, fmt.Errorf("expected: 2, 3; got: %d, %d", a, b)
+							}
+
+							return "baz", nil
+						},
+					}, nil
+				},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys: []*sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"one"}},
+						{Key: "bar", Args: []interface{}{42, 43}},
+					},
+					KeyId: 42,
+				},
+			},
+			nil,
+			`error calling function "foo.bar": expected: 2, 3; got: 42, 43`,
 		},
 	}
 
@@ -824,17 +1005,17 @@ func TestImportGet_namespaceCreator(t *testing.T) {
 		actual, err := impt.Get([]*sdk.GetReq{
 			{
 				ExecId: 1,
-				Keys:   []string{"foo"},
+				Keys:   []*sdk.GetKey{{Key: "foo"}},
 				KeyId:  1,
 			},
 			{
 				ExecId: 2,
-				Keys:   []string{"bar"},
+				Keys:   []*sdk.GetKey{{Key: "bar"}},
 				KeyId:  3,
 			},
 			{
 				ExecId: 1,
-				Keys:   []string{"baz"},
+				Keys:   []*sdk.GetKey{{Key: "baz"}},
 				KeyId:  5,
 			},
 		})
@@ -888,13 +1069,13 @@ func TestImportGet_namespaceCreatorExpire(t *testing.T) {
 			{
 				ExecId:       1,
 				ExecDeadline: deadline1,
-				Keys:         []string{"foo"},
+				Keys:         []*sdk.GetKey{{Key: "foo"}},
 				KeyId:        1,
 			},
 			{
 				ExecId:       2,
 				ExecDeadline: deadline2,
-				Keys:         []string{"bar"},
+				Keys:         []*sdk.GetKey{{Key: "bar"}},
 				KeyId:        3,
 			},
 		})
