@@ -41,6 +41,7 @@ message Get {
         uint64 exec_deadline = 3;
         repeated Key keys = 4;
         uint64 key_id = 5;
+        map<string,Value> context = 6;
     }
 
     // Response is a single response for a Get.
@@ -49,6 +50,8 @@ message Get {
         uint64 key_id = 2;
         repeated string keys = 3;
         Value value = 4;
+        map<string,Value> context = 5;
+        bool callable = 6;
     }
 
     // MultiRequest allows multiple requests in a single Get.

@@ -636,21 +636,6 @@ func TestImportGet(t *testing.T) {
 		},
 
 		{
-			"key call unsupported",
-			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: "bar"}},
-			[]*sdk.GetReq{
-				{
-					Keys: []sdk.GetKey{
-						{Key: "foo", Args: []interface{}{"asdf"}},
-					},
-					KeyId: 42,
-				},
-			},
-			nil,
-			`key "foo" doesn't support function calls`,
-		},
-
-		{
 			"key call with no error result",
 			&rootEmbedCall{&nsCall{
 				F: func(v string) interface{} {
@@ -753,6 +738,178 @@ func TestImportGet(t *testing.T) {
 				},
 			},
 			"",
+		},
+
+		{
+			"get call with receiver",
+			&rootNew{},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:     []string{"foo"},
+					KeyId:    42,
+					Value:    map[string]interface{}{"result": "New called"},
+					Context:  map[string]interface{}{"foo": map[string]interface{}{"result": "New called"}},
+					Callable: true,
+				},
+			},
+			"",
+		},
+
+		{
+			"get call with receiver (assert input)",
+			&rootNew{
+				F: func(data map[string]interface{}) (Namespace, error) {
+					if data["a"] == "b" {
+						return &nsKeyValueMap{map[string]interface{}{
+							"foo": map[string]interface{}{
+								"result": "OK",
+							},
+						}}, nil
+					}
+
+					return nil, nil
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:     []string{"foo"},
+					KeyId:    42,
+					Value:    map[string]interface{}{"result": "OK"},
+					Context:  map[string]interface{}{"foo": map[string]interface{}{"result": "OK"}},
+					Callable: true,
+				},
+			},
+			"",
+		},
+
+		{
+			"func call with receiver (non-callable result, mutate receiver)",
+			&rootNew{
+				F: func(data map[string]interface{}) (Namespace, error) {
+					return &nsMutable{Value: data["value"].(string)}, nil
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"two"}},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"value": "one"},
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:    []string{"foo"},
+					KeyId:   42,
+					Value:   "OK",
+					Context: map[string]interface{}{"value": "two"},
+				},
+			},
+			"",
+		},
+
+		{
+			"get without receiver on New implementation",
+			&rootNew{},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:     []string{"foo"},
+					KeyId:    42,
+					Value:    map[string]interface{}{"result": "New not called (Get)"},
+					Callable: true,
+				},
+			},
+			"",
+		},
+
+		{
+			"func call without receiver on New implementation",
+			&rootNew{},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo", Args: []interface{}{}},
+					},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:     []string{"foo"},
+					KeyId:    42,
+					Value:    map[string]interface{}{"result": "New not called (Func)"},
+					Callable: true,
+				},
+			},
+			"",
+		},
+
+		{
+			"unknown receiver data from instantiation",
+			&rootNew{
+				F: func(map[string]interface{}) (Namespace, error) {
+					return nil, nil
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+					Value: sdk.Undefined,
+				},
+			},
+			"",
+		},
+
+		{
+			"key call unsupported",
+			&rootEmbedNamespace{&nsKeyValue{Key: "foo", Value: "bar"}},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo", Args: []interface{}{"asdf"}},
+					},
+					KeyId: 42,
+				},
+			},
+			nil,
+			`key "foo" doesn't support function calls`,
 		},
 
 		{
@@ -908,6 +1065,134 @@ func TestImportGet(t *testing.T) {
 			nil,
 			`error calling function "foo.bar": expected: 2, 3; got: 42, 43`,
 		},
+
+		{
+			"error from receiver constructor",
+			&rootNew{
+				F: func(map[string]interface{}) (Namespace, error) {
+					return nil, fmt.Errorf("OK")
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			nil,
+			"error instantiating namespace: OK",
+		},
+
+		{
+			"error from receiver constructor, function call",
+			&rootNew{
+				F: func(map[string]interface{}) (Namespace, error) {
+					return nil, nil
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+						{Key: "bar", Args: []interface{}{"one"}},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			nil,
+			`attempting to call function "foo.bar" on undefined receiver`,
+		},
+
+		{
+			"Context supplied but New not implemented",
+			&rootEmbedNamespace{&nsKeyValue{
+				Key:   "foo",
+				Value: "bar",
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			nil,
+			"sdk.GetReq.Context present but import does not support framework.New",
+		},
+
+		{
+			"receiver marshal error",
+			&rootNew{
+				F: func(data map[string]interface{}) (Namespace, error) {
+					return &nsKeyValueMap{map[string]interface{}{
+						"foo": map[string]interface{}{
+							"result": "Not OK",
+						},
+						"bar": &nsMapErr{},
+					}}, nil
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			nil,
+			`error marshaling receiver after retrieving key "foo": map error`,
+		},
+
+		{
+			"receiver non-object",
+			&rootNew{
+				F: func(data map[string]interface{}) (Namespace, error) {
+					return &nsKeyValue{
+						Key:   "foo",
+						Value: "Not OK",
+					}, nil
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			nil,
+			`error marshaling receiver after retrieving key "foo": receiver is no longer an object`,
+		},
+
+		{
+			"receiver nil object",
+			&rootNew{
+				F: func(data map[string]interface{}) (Namespace, error) {
+					return &nsNilable{}, nil
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId:   42,
+					Context: map[string]interface{}{"a": "b"},
+				},
+			},
+			nil,
+			`error marshaling receiver after retrieving key "foo": receiver is now nil`,
+		},
 	}
 
 	for _, tc := range cases {
@@ -1014,6 +1299,66 @@ type nsMapErr struct{}
 
 func (v *nsMapErr) Get(string) (interface{}, error)      { return map[string]interface{}{}, nil }
 func (v *nsMapErr) Map() (map[string]interface{}, error) { return nil, errors.New("map error") }
+
+// rootNew implements a mock namespace for testing framework.New.
+type rootNew struct {
+	F func(map[string]interface{}) (Namespace, error)
+}
+
+func (r *rootNew) Configure(map[string]interface{}) error { return nil }
+
+func (r *rootNew) Get(k string) (interface{}, error) {
+	return map[string]interface{}{"result": "New not called (Get)"}, nil
+}
+
+func (r *rootNew) Func(k string) interface{} {
+	return func() (interface{}, error) {
+		return map[string]interface{}{"result": "New not called (Func)"}, nil
+	}
+}
+
+func (r *rootNew) New(data map[string]interface{}) (Namespace, error) {
+	if r.F != nil {
+		return r.F(data)
+	}
+
+	return &nsKeyValueMap{map[string]interface{}{
+		"foo": map[string]interface{}{
+			"result": "New called",
+		},
+	}}, nil
+}
+
+// nsMutable represents a mutable namespace.
+type nsMutable struct {
+	Value string
+}
+
+func (v *nsMutable) Get(key string) (interface{}, error) {
+	return v.Value, nil
+}
+
+func (v *nsMutable) Map() (map[string]interface{}, error) {
+	return map[string]interface{}{"value": v.Value}, nil
+}
+
+func (v *nsMutable) Func(key string) interface{} {
+	return func(s string) (interface{}, error) {
+		v.Value = s
+		return "OK", nil
+	}
+}
+
+// nsNilable is a fake namespace that returns nil for everything.
+type nsNilable struct{}
+
+func (v *nsNilable) Get(key string) (interface{}, error) {
+	return nil, nil
+}
+
+func (v *nsNilable) Map() (map[string]interface{}, error) {
+	return nil, nil
+}
 
 // Test Get with a Root that implements NamespaceCreator.
 func TestImportGet_namespaceCreator(t *testing.T) {

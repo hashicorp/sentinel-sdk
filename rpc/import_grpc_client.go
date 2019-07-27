@@ -47,6 +47,7 @@ func (m *ImportGRPCClient) Configure(config map[string]interface{}) error {
 func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 	reqs := make([]*proto.Get_Request, 0, len(rawReqs))
 	for _, req := range rawReqs {
+		// Request keys
 		keys := make([]*proto.Get_Request_Key, len(req.Keys))
 		for i, reqKey := range req.Keys {
 			keys[i] = &proto.Get_Request_Key{Key: reqKey.Key}
@@ -63,12 +64,27 @@ func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) 
 			}
 		}
 
+		// Request context
+		var reqCtx map[string]*proto.Value
+		if req.Context != nil {
+			reqCtx = make(map[string]*proto.Value)
+			for k, raw := range req.Context {
+				v, err := encoding.GoToValue(raw)
+				if err != nil {
+					return nil, err
+				}
+
+				reqCtx[k] = v
+			}
+		}
+
 		reqs = append(reqs, &proto.Get_Request{
 			InstanceId:   m.instanceId,
 			ExecId:       req.ExecId,
 			ExecDeadline: uint64(req.ExecDeadline.Unix()),
 			Keys:         keys,
 			KeyId:        req.KeyId,
+			Context:      reqCtx,
 		})
 	}
 
@@ -86,10 +102,26 @@ func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) 
 			return nil, err
 		}
 
+		// Response context
+		var resCtx map[string]interface{}
+		if resp.Context != nil {
+			resCtx = make(map[string]interface{})
+			for k, raw := range resp.Context {
+				v, err := encoding.ValueToGo(raw, nil)
+				if err != nil {
+					return nil, fmt.Errorf("error converting context value for key %q: %s", k, err)
+				}
+
+				resCtx[k] = v
+			}
+		}
+
 		results = append(results, &sdk.GetResult{
-			KeyId: resp.KeyId,
-			Keys:  resp.Keys,
-			Value: v,
+			KeyId:    resp.KeyId,
+			Keys:     resp.Keys,
+			Value:    v,
+			Context:  resCtx,
+			Callable: resp.Callable,
 		})
 	}
 
