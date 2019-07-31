@@ -58,7 +58,7 @@ func TestImport_gRPC_get(t *testing.T) {
 	results, err := obj.Get([]*sdk.GetReq{
 		&sdk.GetReq{
 			KeyId: 42,
-			Keys: []*sdk.GetKey{
+			Keys: []sdk.GetKey{
 				{
 					Key:  "foo",
 					Args: []interface{}{"foo", 42},

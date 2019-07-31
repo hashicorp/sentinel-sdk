@@ -85,9 +85,9 @@ func (m *ImportGRPCServer) Get(
 	// calls for each proper instance easily.
 	requestsById := make(map[uint64][]*sdk.GetReq)
 	for _, req := range v.Requests {
-		keys := make([]*sdk.GetKey, len(req.Keys))
+		keys := make([]sdk.GetKey, len(req.Keys))
 		for i, reqKey := range req.Keys {
-			keys[i] = &sdk.GetKey{Key: reqKey.Key}
+			keys[i] = sdk.GetKey{Key: reqKey.Key}
 			if reqKey.Args != nil {
 				keys[i].Args = make([]interface{}, len(reqKey.Args))
 				for j, arg := range reqKey.Args {
