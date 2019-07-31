@@ -93,9 +93,15 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 
 				result = v
 
-			// For maps with string keys, get the value
+			// For maps with string keys, get the value. If the value is
+			// nil, return sdk.Null to ensure that we don't mess with how
+			// reflection deals with "invalid" zero values in maps. See
+			// Import.reflectMap for more details.
 			case map[string]interface{}:
 				result = x[k.Key]
+				if result == nil {
+					result = sdk.Null
+				}
 
 			// Else...
 			default:
