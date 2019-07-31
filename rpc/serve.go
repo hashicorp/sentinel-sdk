@@ -18,7 +18,7 @@ var Handshake = goplugin.HandshakeConfig{
 	// one or the other that makes it so that they can't safely communicate.
 	// This could be adding a new interface value, it could be how
 	// helper/schema computes diffs, etc.
-	ProtocolVersion: 1,
+	ProtocolVersion: 2,
 
 	// The magic cookie values should NEVER be changed.
 	MagicCookieKey:   "SENTINEL_PLUGIN_MAGIC_COOKIE",

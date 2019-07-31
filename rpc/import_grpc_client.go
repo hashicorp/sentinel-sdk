@@ -47,16 +47,19 @@ func (m *ImportGRPCClient) Configure(config map[string]interface{}) error {
 func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 	reqs := make([]*proto.Get_Request, 0, len(rawReqs))
 	for _, req := range rawReqs {
-		var args []*proto.Value
-		if req.Args != nil {
-			args = make([]*proto.Value, len(req.Args))
-			for i, raw := range req.Args {
-				v, err := encoding.GoToValue(raw)
-				if err != nil {
-					return nil, err
-				}
+		keys := make([]*proto.Get_Request_Key, len(req.Keys))
+		for i, reqKey := range req.Keys {
+			keys[i] = &proto.Get_Request_Key{Key: reqKey.Key}
+			if reqKey.Args != nil {
+				keys[i].Args = make([]*proto.Value, len(reqKey.Args))
+				for j, raw := range reqKey.Args {
+					v, err := encoding.GoToValue(raw)
+					if err != nil {
+						return nil, err
+					}
 
-				args[i] = v
+					keys[i].Args[j] = v
+				}
 			}
 		}
 
@@ -64,10 +67,8 @@ func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) 
 			InstanceId:   m.instanceId,
 			ExecId:       req.ExecId,
 			ExecDeadline: uint64(req.ExecDeadline.Unix()),
-			Keys:         req.Keys,
+			Keys:         keys,
 			KeyId:        req.KeyId,
-			Call:         args != nil,
-			Args:         args,
 		})
 	}
 

@@ -66,21 +66,40 @@ type GetReq struct {
 
 	// Keys is the list of keys being requested. For example for "a.b.c"
 	// where "a" is the import, Keys would be ["b", "c"].
-	//
+	Keys []*GetKey
+
 	// KeyId is a unique ID for this key. This should match exactly the
 	// GetResult KeyId so that the result for this can be found quickly.
-	Keys  []string
 	KeyId uint64
+}
 
-	// Args is the list of arguments for a call expression. This is "nil"
-	// if this isn't a call. This may be length zero (but non-nil) if this
-	// is a call with no arguments.
+// GetKey is an individual key in the larger possible selector of the
+// specific import call, along with any supplied arguments for the
+// specific key.
+type GetKey struct {
+	// The key for this part of the request.
+	Key string
+
+	// The list of arguments for a call expression. This is "nil" if
+	// this key is not a call. This may be length zero (but non-nil) if
+	// this is a call with no arguments.
 	Args []interface{}
 }
 
 // Call returns true if this request is a call expression.
-func (g *GetReq) Call() bool {
+func (g *GetKey) Call() bool {
 	return g.Args != nil
+}
+
+// GetKeys returns a list of the string keys in the GetReq, without
+// the arguments.
+func (g *GetReq) GetKeys() []string {
+	s := make([]string, len(g.Keys))
+	for i, k := range g.Keys {
+		s[i] = k.Key
+	}
+
+	return s
 }
 
 // GetResult is the result structure for a Get request.

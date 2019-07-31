@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/sentinel-sdk"
@@ -32,12 +31,12 @@ func TestImport_gRPC_get(t *testing.T) {
 	importMock.On("Configure", map[string]interface{}{}).Return(nil)
 	importMock.On("Get",
 		mock.MatchedBy(func(reqs []*sdk.GetReq) bool {
-			args := reqs[0].Args
 			return len(reqs) == 1 &&
-				reflect.DeepEqual(reqs[0].Keys, []string{"key"}) &&
-				len(args) == 2 &&
-				args[0] == "foo" &&
-				args[1] == 42
+				len(reqs[0].Keys) == 1 &&
+				len(reqs[0].Keys[0].Args) == 2 &&
+				reqs[0].Keys[0].Key == "foo" &&
+				reqs[0].Keys[0].Args[0] == "foo" &&
+				reqs[0].Keys[0].Args[1] == int64(42)
 		})).
 		Return([]*sdk.GetResult{
 			&sdk.GetResult{
@@ -59,8 +58,12 @@ func TestImport_gRPC_get(t *testing.T) {
 	results, err := obj.Get([]*sdk.GetReq{
 		&sdk.GetReq{
 			KeyId: 42,
-			Keys:  []string{"key"},
-			Args:  []interface{}{"foo", 42},
+			Keys: []*sdk.GetKey{
+				{
+					Key:  "foo",
+					Args: []interface{}{"foo", 42},
+				},
+			},
 		},
 	})
 	importMock.AssertExpectations(t)

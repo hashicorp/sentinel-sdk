@@ -85,25 +85,27 @@ func (m *ImportGRPCServer) Get(
 	// calls for each proper instance easily.
 	requestsById := make(map[uint64][]*sdk.GetReq)
 	for _, req := range v.Requests {
+		keys := make([]*sdk.GetKey, len(req.Keys))
+		for i, reqKey := range req.Keys {
+			keys[i] = &sdk.GetKey{Key: reqKey.Key}
+			if reqKey.Args != nil {
+				keys[i].Args = make([]interface{}, len(reqKey.Args))
+				for j, arg := range reqKey.Args {
+					obj, err := encoding.ValueToGo(arg, nil)
+					if err != nil {
+						return nil, fmt.Errorf("error converting arg %d: %s", i, err)
+					}
+
+					keys[i].Args[j] = obj
+				}
+			}
+		}
+
 		getReq := &sdk.GetReq{
 			ExecId:       req.ExecId,
 			ExecDeadline: time.Unix(int64(req.ExecDeadline), 0),
-			Keys:         req.Keys,
+			Keys:         keys,
 			KeyId:        req.KeyId,
-		}
-
-		if req.Call {
-			args := make([]interface{}, len(req.Args))
-			for i, arg := range req.Args {
-				obj, err := encoding.ValueToGo(arg, nil)
-				if err != nil {
-					return nil, fmt.Errorf("error converting arg %d: %s", i, err)
-				}
-
-				args[i] = obj
-			}
-
-			getReq.Args = args
 		}
 
 		requestsById[req.InstanceId] = append(requestsById[req.InstanceId], getReq)
