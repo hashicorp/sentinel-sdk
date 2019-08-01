@@ -66,7 +66,7 @@ type GetReq struct {
 
 	// Keys is the list of keys being requested. For example for "a.b.c"
 	// where "a" is the import, Keys would be ["b", "c"].
-	Keys []*GetKey
+	Keys []GetKey
 
 	// KeyId is a unique ID for this key. This should match exactly the
 	// GetResult KeyId so that the result for this can be found quickly.
