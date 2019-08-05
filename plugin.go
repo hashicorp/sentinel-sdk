@@ -71,6 +71,16 @@ type GetReq struct {
 	// KeyId is a unique ID for this key. This should match exactly the
 	// GetResult KeyId so that the result for this can be found quickly.
 	KeyId uint64
+
+	// Context, if supplied, is an arbitrary object intended to
+	// represent the data from an existing namespace. If the import
+	// supports the framework.New interface, the contents are passed to
+	// it, with any resulting namespace being what Get operates on.
+	//
+	// The Get call operates on the root of the import if this is set
+	// to nil. If this is set and the import does not implement
+	// framework.New, an error is returned.
+	Context map[string]interface{}
 }
 
 // GetKey is an individual key in the larger possible selector of the
@@ -104,9 +114,11 @@ func (g *GetReq) GetKeys() []string {
 
 // GetResult is the result structure for a Get request.
 type GetResult struct {
-	KeyId uint64      // KeyId matching GetReq.KeyId, or zero.
-	Keys  []string    // Keys structure from GetReq.Keys, or new key set.
-	Value interface{} // Value compatible with lang/object.ToObject
+	KeyId    uint64                 // KeyId matching GetReq.KeyId, or zero.
+	Keys     []string               // Keys structure from GetReq.Keys, or new key set.
+	Value    interface{}            // Value compatible with lang/object.ToObject
+	Context  map[string]interface{} // Updated Context if it was sent
+	Callable bool                   // true if returned Value is callable
 }
 
 // GetResultList is a wrapper around a slice of GetResult structures

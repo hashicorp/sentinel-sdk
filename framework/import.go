@@ -10,6 +10,7 @@
 package framework
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -57,6 +58,50 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 	for i, req := range reqs {
 		// Get the namespace
 		ns := m.namespace(req)
+
+		// If Context is supplied and the root supports New, handle it.
+		// We use the value of constructorOk later on to determine if the
+		// return value will be callable as well.
+		constructor, constructorOk := ns.(New)
+		if req.Context != nil {
+			if constructorOk {
+				var err error
+				ns, err = constructor.New(req.Context)
+				if err != nil {
+					return nil, fmt.Errorf("error instantiating namespace: %s", err)
+				}
+
+				if ns == nil {
+					// No namespace was returned. This is technically
+					// undefined, but we need to check to make sure there were
+					// no function calls first, or else this is an error, not
+					// undefined.
+					for i, k := range req.Keys {
+						if k.Call() {
+							return nil, fmt.Errorf(
+								"attempting to call function %q on undefined receiver",
+								strings.Join(req.GetKeys()[:i+1], "."))
+						}
+					}
+
+					// If this was just a get call, we can short-circuit the
+					// result here, with undefined.
+					resp[i] = &sdk.GetResult{
+						KeyId: req.KeyId,
+						Keys:  req.GetKeys(),
+						Value: sdk.Undefined,
+					}
+					continue
+				}
+			} else {
+				// Invalid implementation. This should not happen and is
+				// indicative of something more than likely wrong with the
+				// runtime. Nonetheless, this is not the import's problem
+				// as the malformed data did not come from it.
+				return nil, errors.New(
+					"sdk.GetReq.Context present but import does not support framework.New")
+			}
+		}
 
 		// For each key, perform a get
 		var result interface{} = ns
@@ -125,21 +170,8 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 			}
 		}
 
-		// If we have a Map implementation, we return the whole thing.
-		if m, ok := result.(Map); ok {
-			var err error
-			result, err = m.Map()
-			if err != nil {
-				return nil, fmt.Errorf(
-					"error retrieving key %q: %s",
-					strings.Join(req.GetKeys(), "."), err)
-			}
-		}
-
-		// We now need to do a bit of reflection to convert any dangling
-		// namespace values into values that can be returned across the
-		// plugin interface.
-		result, err := m.reflect(result)
+		var err error
+		result, err = m.resultReflect(result)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"error retrieving key %q: %s",
@@ -151,15 +183,72 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 			result = sdk.Undefined
 		}
 
-		// Build the actual result
+		// Start building the actual result
 		resp[i] = &sdk.GetResult{
 			KeyId: req.KeyId,
 			Keys:  req.GetKeys(),
 			Value: result,
 		}
+
+		// If the root supported framework.New and we have a map, flag
+		// the ability to call methods on the result.
+		if _, ok := result.(map[string]interface{}); ok && constructorOk {
+			resp[i].Callable = true
+		}
+
+		// If Context was supplied, get the receiver to be returned
+		if req.Context != nil {
+			respCtxRaw, err := m.resultReflect(ns)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"error marshaling receiver after retrieving key %q: %s",
+					strings.Join(req.GetKeys(), "."), err)
+			}
+
+			respCtx, ok := respCtxRaw.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf(
+					"error marshaling receiver after retrieving key %q: receiver is no longer an object",
+					strings.Join(req.GetKeys(), "."))
+			}
+
+			if respCtx == nil {
+				return nil, fmt.Errorf(
+					"error marshaling receiver after retrieving key %q: receiver is now nil",
+					strings.Join(req.GetKeys(), "."))
+			}
+
+			resp[i].Context = respCtx
+		}
+
+		// End of request loop. Result should be fully built here and
+		// request will proceed to the next request (if it exists in the
+		// payload).
 	}
 
+	// Done processing all requests, return response.
 	return resp, nil
+}
+
+func (m *Import) resultReflect(result interface{}) (interface{}, error) {
+	// If we have a Map implementation, we return the whole thing.
+	if m, ok := result.(Map); ok {
+		var err error
+		result, err = m.Map()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// We now need to do a bit of reflection to convert any dangling
+	// namespace values into values that can be returned across the
+	// plugin interface.
+	result, err := m.reflect(result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // namespace returns the namespace for the request.

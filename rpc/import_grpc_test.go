@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/sentinel-sdk"
@@ -36,13 +37,24 @@ func TestImport_gRPC_get(t *testing.T) {
 				len(reqs[0].Keys[0].Args) == 2 &&
 				reqs[0].Keys[0].Key == "foo" &&
 				reqs[0].Keys[0].Args[0] == "foo" &&
-				reqs[0].Keys[0].Args[1] == int64(42)
+				reqs[0].Keys[0].Args[1] == int64(42) &&
+				reqs[0].Context["_type"] == "SomeNamespace" &&
+				reqs[0].Context["data"].(map[string]interface{})["string"] == "foo" &&
+				reqs[0].Context["data"].(map[string]interface{})["number"] == int64(0)
 		})).
 		Return([]*sdk.GetResult{
 			&sdk.GetResult{
 				KeyId: 42,
 				Keys:  []string{"key"},
 				Value: "bar",
+				Context: map[string]interface{}{
+					"_type": "SomeNamespace",
+					"data": map[string]interface{}{
+						"string": "bar",
+						"number": 1,
+					},
+				},
+				Callable: true,
 			},
 		}, nil)
 
@@ -64,6 +76,13 @@ func TestImport_gRPC_get(t *testing.T) {
 					Args: []interface{}{"foo", 42},
 				},
 			},
+			Context: map[string]interface{}{
+				"_type": "SomeNamespace",
+				"data": map[string]interface{}{
+					"string": "foo",
+					"number": 0,
+				},
+			},
 		},
 	})
 	importMock.AssertExpectations(t)
@@ -72,8 +91,20 @@ func TestImport_gRPC_get(t *testing.T) {
 	}
 
 	{
-		result := sdk.GetResultList(results).KeyId(42).Value
-		if result != "bar" {
+		result := sdk.GetResultList(results).KeyId(42)
+		if !reflect.DeepEqual(result, &sdk.GetResult{
+			KeyId: 42,
+			Keys:  []string{"key"},
+			Value: "bar",
+			Context: map[string]interface{}{
+				"_type": "SomeNamespace",
+				"data": map[string]interface{}{
+					"string": "bar",
+					"number": int64(1),
+				},
+			},
+			Callable: true,
+		}) {
 			t.Fatalf("bad: %#v", result)
 		}
 	}

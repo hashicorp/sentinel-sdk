@@ -85,6 +85,7 @@ func (m *ImportGRPCServer) Get(
 	// calls for each proper instance easily.
 	requestsById := make(map[uint64][]*sdk.GetReq)
 	for _, req := range v.Requests {
+		// Request keys
 		keys := make([]sdk.GetKey, len(req.Keys))
 		for i, reqKey := range req.Keys {
 			keys[i] = sdk.GetKey{Key: reqKey.Key}
@@ -101,11 +102,26 @@ func (m *ImportGRPCServer) Get(
 			}
 		}
 
+		// Object context
+		var reqCtx map[string]interface{}
+		if req.Context != nil {
+			reqCtx = make(map[string]interface{})
+			for k, raw := range req.Context {
+				v, err := encoding.ValueToGo(raw, nil)
+				if err != nil {
+					return nil, fmt.Errorf("error converting context value for key %q: %s", k, err)
+				}
+
+				reqCtx[k] = v
+			}
+		}
+
 		getReq := &sdk.GetReq{
 			ExecId:       req.ExecId,
 			ExecDeadline: time.Unix(int64(req.ExecDeadline), 0),
 			Keys:         keys,
 			KeyId:        req.KeyId,
+			Context:      reqCtx,
 		}
 
 		requestsById[req.InstanceId] = append(requestsById[req.InstanceId], getReq)
@@ -126,9 +142,24 @@ func (m *ImportGRPCServer) Get(
 		}
 
 		for _, result := range results {
+			// Return value
 			v, err := encoding.GoToValue(result.Value)
 			if err != nil {
 				return nil, err
+			}
+
+			// Return context
+			var resCtx map[string]*proto.Value
+			if result.Context != nil {
+				resCtx = make(map[string]*proto.Value)
+				for k, raw := range result.Context {
+					v, err := encoding.GoToValue(raw)
+					if err != nil {
+						return nil, err
+					}
+
+					resCtx[k] = v
+				}
 			}
 
 			responses = append(responses, &proto.Get_Response{
@@ -136,6 +167,8 @@ func (m *ImportGRPCServer) Get(
 				KeyId:      result.KeyId,
 				Keys:       result.Keys,
 				Value:      v,
+				Context:    resCtx,
+				Callable:   result.Callable,
 			})
 		}
 	}

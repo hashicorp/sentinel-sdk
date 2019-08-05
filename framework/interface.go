@@ -53,6 +53,33 @@ type NamespaceCreator interface {
 	Namespace() Namespace
 }
 
+// New is an interface indicating that the namespace supports object
+// construction via the handling of arbitrary object data. New is
+// only supported on root namespaces, so either created through
+// Root or NamespaceCreator.
+//
+// The format of the object and the kinds of namespaces returned by
+// the constructor are up to the import author.
+type New interface {
+	Namespace
+
+	// New is called to construct new namespaces based on arbitrary
+	// receiver data.
+	//
+	// The format of the object and the kinds of namespaces returned by
+	// the constructor are up to the import author.
+	//
+	// Namespaces returned by this function must implement
+	// framework.Map, or else errors will be returned on
+	// post-processing of the receiver.
+	//
+	// New should return an error if there are issues instantiating the
+	// namespace. This includes if the namespace cannot be determined
+	// from the receiver data. Returning nil from this function will
+	// return undefined to the caller.
+	New(map[string]interface{}) (Namespace, error)
+}
+
 // Namespace represents a namespace of attributes that can be requested
 // by key. For example in "time.pst.hour, time.pst.minute", "time.pst" would
 // be a namespace.
