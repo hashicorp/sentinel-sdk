@@ -89,7 +89,7 @@ func (m *ImportGRPCServer) Get(
 		keys := make([]sdk.GetKey, len(req.Keys))
 		for i, reqKey := range req.Keys {
 			keys[i] = sdk.GetKey{Key: reqKey.Key}
-			if reqKey.Args != nil {
+			if reqKey.Call {
 				keys[i].Args = make([]interface{}, len(reqKey.Args))
 				for j, arg := range reqKey.Args {
 					obj, err := encoding.ValueToGo(arg, nil)

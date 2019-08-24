@@ -34,6 +34,7 @@ message Get {
         message Key {
           string key = 1;
           repeated Value args = 2;
+          bool call = 3;
         }
 
         uint64 instance_id = 1;
