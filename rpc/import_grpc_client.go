@@ -52,6 +52,7 @@ func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) 
 		for i, reqKey := range req.Keys {
 			keys[i] = &proto.Get_Request_Key{Key: reqKey.Key}
 			if reqKey.Args != nil {
+				keys[i].Call = true
 				keys[i].Args = make([]*proto.Value, len(reqKey.Args))
 				for j, raw := range reqKey.Args {
 					v, err := encoding.GoToValue(raw)
