@@ -23,8 +23,9 @@ var (
 	Null = &null{}
 )
 
-//go:generate rm -f mock_Import.go
+//go:generate rm -f mock_Import.go mock_Import_Closer.go
 //go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Import
+//go:generate cp mock_Import_Closer.go.src mock_Import_Closer.go
 
 // Import is an importable package.
 //
