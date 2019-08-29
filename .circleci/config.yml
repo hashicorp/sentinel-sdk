@@ -9,6 +9,7 @@ jobs:
     steps:
       - checkout
       - run: make /usr/bin/sentinel
+      - run: make modules
       - run: make tools
       - run: make test-circle
       - store_test_results:
