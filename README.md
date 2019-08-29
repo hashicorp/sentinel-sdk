@@ -52,6 +52,9 @@ After both of these are installed, you can use the following `make` commands:
 * `make generate` will generate any auto-generated code. Currently this includes
   the protocol, mockery files, and the code for the plugin testing toolkit.
 
+The `modules`, `test-circle`, and `/usr/bin/sentinel` targets are only used in
+Circle and are not necessary for interactive development.
+
 ## Help and Discussion
 
 For issues specific to the SDK, please use the GitHub issue tracker (the
