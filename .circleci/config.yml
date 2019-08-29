@@ -8,6 +8,8 @@ jobs:
     working_directory: /go/src/github.com/hashicorp/sentinel-sdk
     steps:
       - checkout
+      - run: make /usr/bin/sentinel
+      - run: make tools
       - run: make test-circle
       - store_test_results:
           path: test-results/

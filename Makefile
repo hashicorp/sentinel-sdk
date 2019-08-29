@@ -11,9 +11,9 @@ test:
 # FIXME: Remove the "testing" filter after Sentinel 0.11.0. These
 # tests are currently broken due to the discrepancy in protocol
 # version.
-test-circle: /usr/bin/sentinel tools
+test-circle:
 	mkdir -p test-results/sentinel-sdk
-	gotestsum --junitfile test-results/sentinel-sdk/results.xml $(shell go list ./... | grep -v testing)
+	gotestsum --format=short-verbose --junitfile test-results/sentinel-sdk/results.xml $(shell go list ./... | grep -v testing)
 
 /usr/bin/sentinel:
 	gpg --import .circleci/hashicorp.gpg && \
