@@ -12,8 +12,8 @@ test:
 # tests are currently broken due to the discrepancy in protocol
 # version.
 test-circle: /usr/bin/sentinel tools
-	mkdir -p test-results/
-	gotestsum --junitfile test-results/results.xml $(shell go list ./... | grep -v testing)
+	mkdir -p test-results/go-test
+	gotestsum --junitfile test-results/go-test/results.xml $(shell go list ./... | grep -v testing)
 
 /usr/bin/sentinel:
 	gpg --import .circleci/hashicorp.gpg && \
