@@ -8,12 +8,21 @@ SENTINEL_VERSION = 0.10.4
 test:
 	go test ./...
 
+generate: tools
+	go generate ./...
+
+modules:
+	go mod download
+
 # FIXME: Remove the "testing" filter after Sentinel 0.11.0. These
 # tests are currently broken due to the discrepancy in protocol
 # version.
 test-circle:
 	mkdir -p test-results/sentinel-sdk
 	gotestsum --format=short-verbose --junitfile test-results/sentinel-sdk/results.xml $(shell go list ./... | grep -v testing)
+
+tools:
+	go install $(GOTOOLS)
 
 /usr/bin/sentinel:
 	gpg --import .circleci/hashicorp.gpg && \
@@ -26,10 +35,4 @@ test-circle:
 	cd /usr/bin && \
 	sudo unzip /tmp/sentinel_${SENTINEL_VERSION}_linux_amd64.zip
 
-tools:
-	go install $(GOTOOLS)
-
-generate: tools
-	go generate ./...
-
-.PHONY: test test-circle tools generate
+.PHONY: test generate modules test-circle tools
