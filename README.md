@@ -47,7 +47,8 @@ The following tools are required to work with the Sentinel SDK:
 
 After both of these are installed, you can use the following `make` commands:
 
-* `make test` will run tests on the SDK.
+* `make test` will run tests on the SDK. You can use the `TEST` and `TESTARGS`
+  variables to control the packages and test arguments, respectively.
 * `make tools` will install any necessary Go tools.
 * `make generate` will generate any auto-generated code. Currently this includes
   the protocol, mockery files, and the code for the plugin testing toolkit.

@@ -5,8 +5,8 @@ GOTOOLS = \
 
 SENTINEL_VERSION = 0.10.4
 
-test:
-	go test ./...
+test: tools
+	gotestsum --format=short-verbose $(TEST) $(TESTARGS)
 
 generate: tools
 	go generate ./...
