@@ -1,9 +1,14 @@
 GOTOOLS = \
 	github.com/golang/protobuf/protoc-gen-go \
-	github.com/vektra/mockery/cmd/mockery
+	github.com/vektra/mockery/cmd/mockery \
+	gotest.tools/gotestsum
 
 test:
 	go test ./...
+
+test-circle: tools
+	mkdir -p test-results/
+	gotestsum --junitfile test-results/results.xml
 
 tools:
 	go install $(GOTOOLS)
@@ -11,4 +16,4 @@ tools:
 generate: tools
 	go generate ./...
 
-.PHONY: test tools generate
+.PHONY: test test-circle tools generate
