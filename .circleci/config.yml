@@ -3,7 +3,9 @@ jobs:
   test:
     docker:
       - image: circleci/golang:1.12
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+        environment:
+          GO111MODULE: "ON"
+    working_directory: /go/src/github.com/hashicorp/sentinel-sdk
     steps:
       - checkout
       - run: make test-circle
