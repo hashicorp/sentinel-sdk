@@ -5,6 +5,7 @@ references:
     go: &GOLANG_IMAGE circleci/golang:1.12
   cache:
     go-sum: &GO_SUM_CACHE_KEY go-sum-v1-{{ checksum "go.sum" }}
+    sentinel: &SENTINEL_CACHE_KEY sentinel-{{ checksum "/usr/bin/sentinel" }}
   environment: &ENVIRONMENT
     GO111MODULE: "on"
 
@@ -17,7 +18,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: *GO_SUM_CACHE_KEY
+          keys:
+            - *GO_SUM_CACHE_KEY
+            - *SENTINEL_CACHE_KEY
       - run: make /usr/bin/sentinel
       - run: make modules
       - run: make tools
@@ -28,6 +31,10 @@ jobs:
           key: *GO_SUM_CACHE_KEY
           paths:
             - /go/pkg/mod
+      - save_cache:
+          key: *SENTINEL_CACHE_KEY
+          paths:
+            - /usr/bin/sentinel
 
 workflows:
   version: 2
