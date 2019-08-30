@@ -12,7 +12,7 @@ generate: tools
 	go generate ./...
 
 modules:
-	go mod download
+	go mod download && go mod verify
 
 # FIXME: Remove the "testing" filter after Sentinel 0.11.0. These
 # tests are currently broken due to the discrepancy in protocol
