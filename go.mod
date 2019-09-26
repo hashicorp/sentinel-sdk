@@ -11,3 +11,5 @@ require (
 	google.golang.org/grpc v1.18.0
 	gotest.tools/gotestsum v0.3.5
 )
+
+go 1.13
