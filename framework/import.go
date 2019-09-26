@@ -143,9 +143,13 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 			// reflection deals with "invalid" zero values in maps. See
 			// Import.reflectMap for more details.
 			case map[string]interface{}:
-				result = x[k.Key]
-				if result == nil {
-					result = sdk.Null
+				var ok bool
+				if result, ok = x[k.Key]; ok {
+					if result == nil {
+						result = sdk.Null
+					}
+				} else {
+					result = sdk.Undefined
 				}
 
 			// Else...
