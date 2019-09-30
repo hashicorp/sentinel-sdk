@@ -3,7 +3,7 @@ GOTOOLS = \
 	github.com/vektra/mockery/cmd/mockery \
 	gotest.tools/gotestsum
 
-SENTINEL_VERSION = 0.10.4
+SENTINEL_VERSION = 0.11.0
 
 test: tools
 	gotestsum --format=short-verbose $(TEST) $(TESTARGS)
@@ -14,12 +14,9 @@ generate: tools
 modules:
 	go mod download && go mod verify
 
-# FIXME: Remove the "testing" filter after Sentinel 0.11.0. These
-# tests are currently broken due to the discrepancy in protocol
-# version.
 test-circle:
 	mkdir -p test-results/sentinel-sdk
-	gotestsum --format=short-verbose --junitfile test-results/sentinel-sdk/results.xml $(shell go list ./... | grep -v testing)
+	gotestsum --format=short-verbose --junitfile test-results/sentinel-sdk/results.xml
 
 tools:
 	go install $(GOTOOLS)
