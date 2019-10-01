@@ -20,8 +20,10 @@ jobs:
       - restore_cache:
           keys:
             - *GO_SUM_CACHE_KEY
+      - restore_cache:
+          keys:
             - *SENTINEL_CACHE_KEY
-      - run: make /usr/bin/sentinel
+      - run: make /go/bin/sentinel
       - run: make modules
       - run: make tools
       - run: make test-circle
@@ -34,7 +36,7 @@ jobs:
       - save_cache:
           key: *SENTINEL_CACHE_KEY
           paths:
-            - /usr/bin/sentinel
+            - /go/bin/sentinel
 
 workflows:
   version: 2

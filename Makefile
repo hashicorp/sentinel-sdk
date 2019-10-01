@@ -4,6 +4,7 @@ GOTOOLS = \
 	gotest.tools/gotestsum
 
 SENTINEL_VERSION = 0.11.0
+SENTINEL_BIN_PATH := $(shell go env GOPATH)/bin
 
 test: tools
 	gotestsum --format=short-verbose $(TEST) $(TESTARGS)
@@ -21,7 +22,7 @@ test-circle:
 tools:
 	go install $(GOTOOLS)
 
-/usr/bin/sentinel:
+$(SENTINEL_BIN_PATH)/sentinel:
 	gpg --import .circleci/hashicorp.gpg && \
 	cd /tmp && \
 	curl -O https://releases.hashicorp.com/sentinel/${SENTINEL_VERSION}/sentinel_${SENTINEL_VERSION}_linux_amd64.zip && \
@@ -29,7 +30,8 @@ tools:
 	curl -O https://releases.hashicorp.com/sentinel/${SENTINEL_VERSION}/sentinel_${SENTINEL_VERSION}_SHA256SUMS.sig && \
 	gpg --verify sentinel_${SENTINEL_VERSION}_SHA256SUMS.sig && \
 	shasum --check --ignore-missing sentinel_${SENTINEL_VERSION}_SHA256SUMS && \
-	cd /usr/bin && \
-	sudo unzip /tmp/sentinel_${SENTINEL_VERSION}_linux_amd64.zip
+	cd $(SENTINEL_BIN_PATH) && \
+	unzip /tmp/sentinel_${SENTINEL_VERSION}_linux_amd64.zip && \
+	cd && which sentinel
 
 .PHONY: test generate modules test-circle tools
