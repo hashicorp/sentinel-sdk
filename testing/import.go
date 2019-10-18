@@ -53,6 +53,12 @@ type TestImportCase struct {
 	// For a given import path, the test binary will be built exactly once
 	// per test run.
 	ImportPath string
+
+	// A string containing any expected runtime error during evaluation. If
+	// this field is non-empty, a runtime error is expected to occur, and the
+	// Sentinel output is searched for the string given here. If a match is
+	// found, the test passes. If it is not found the test will fail.
+	Error string
 }
 
 // Clean cleans any temporary files created. This should always be called
@@ -127,7 +133,16 @@ func TestImport(t testing.T, c TestImportCase) {
 	cmd.Dir = td
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("error executing test. output:\n\n%s", string(output))
+		if c.Error != "" {
+			if !strings.Contains(string(output), c.Error) {
+				t.Fatalf("expected error %q not found:\n\n%s",
+					c.Error, string(output))
+			}
+		} else {
+			t.Fatalf("error executing test. output:\n\n%s", string(output))
+		}
+	} else if c.Error != "" {
+		t.Fatalf("expected error %q but policy passed", c.Error)
 	}
 }
 
