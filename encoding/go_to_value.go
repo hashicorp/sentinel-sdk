@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
+	"unicode"
 
-	"github.com/hashicorp/sentinel-sdk"
-	"github.com/hashicorp/sentinel-sdk/proto/go"
+	sdk "github.com/hashicorp/sentinel-sdk"
+	proto "github.com/hashicorp/sentinel-sdk/proto/go"
 )
 
 // GoToValue converts the Go value to a protobuf Object.
@@ -152,8 +154,8 @@ func toValue_struct(v reflect.Value) (*proto.Value, error) {
 	// field tags, etc.
 	t := v.Type()
 
-	vs := make([]*proto.Value_KV, v.NumField())
-	for i := range vs {
+	vs := make([]*proto.Value_KV, 0, v.NumField())
+	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
 
 		// If PkgPath is non-empty, this is unexported and can be ignored
@@ -162,7 +164,7 @@ func toValue_struct(v reflect.Value) (*proto.Value, error) {
 		}
 
 		// Determine the map key
-		key := field.Name
+		key := toValue_struct_fieldName([]rune(field.Name))
 		if v, ok := field.Tag.Lookup("sentinel"); ok {
 			// A blank value means to not export this value
 			if v == "" {
@@ -178,13 +180,13 @@ func toValue_struct(v reflect.Value) (*proto.Value, error) {
 			return nil, err
 		}
 
-		vs[i] = &proto.Value_KV{
+		vs = append(vs, &proto.Value_KV{
 			Value: value,
 			Key: &proto.Value{
 				Type:  proto.Value_STRING,
 				Value: &proto.Value_ValueString{ValueString: key},
 			},
-		}
+		})
 	}
 
 	return &proto.Value{
@@ -195,4 +197,27 @@ func toValue_struct(v reflect.Value) (*proto.Value, error) {
 			},
 		},
 	}, nil
+}
+
+func toValue_struct_fieldName(s []rune) string {
+	var result []string
+	var last int
+
+	// Always convert the zero-index rune to a lowercase letter. Since we always
+	// operate on exported struct fields, this is fine and is actually less
+	// costly than doing an IsUpper first.
+	s[0] = unicode.ToLower(s[0])
+
+	for idx := 1; idx < len(s); idx++ {
+		if unicode.IsUpper(s[idx]) {
+			result = append(result, string(s[last:idx]))
+			last = idx
+			s[idx] = unicode.ToLower(s[idx])
+		}
+	}
+
+	// Append anything remaining
+	result = append(result, string(s[last:]))
+
+	return strings.Join(result, "_")
 }

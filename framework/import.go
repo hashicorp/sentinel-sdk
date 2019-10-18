@@ -1,12 +1,3 @@
-// Package framework contains a high-level framework for implementing
-// Sentinel imports with Go.
-//
-// The direct sdk.Import interface is a low-level interface
-// that is tediuos, clunky, and difficult to implement correctly. The interface
-// is this way to assist in the performance of imports while executing
-// Sentinel policies. This package provides a high-level API that eases
-// import implementation while still supporting the performance-sensitive
-// interface underneath.
 package framework
 
 import (
