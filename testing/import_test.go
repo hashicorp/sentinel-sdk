@@ -44,6 +44,15 @@ func TestTestImport(t *testing.T) {
 		})
 	})
 
+	// Test runtime error
+	t.Run("error", func(t *testing.T) {
+		TestImport(&testingiface.RuntimeT{}, TestImportCase{
+			ImportPath: path,
+			Source:     `main = rule { error("nope") }`,
+			Error:      "nope",
+		})
+	})
+
 	// Test configuration
 	t.Run("config", func(t *testing.T) {
 		TestImport(t, TestImportCase{
