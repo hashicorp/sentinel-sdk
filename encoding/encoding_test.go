@@ -404,7 +404,48 @@ var encodingTests = []struct {
 	},
 
 	//-----------------------------------------------------------
-	// Bool
+	// Struct
+
+	{
+		"struct field exported, no tag",
+		struct{ Foo int }{Foo: 42},
+		map[string]int8{
+			"foo": 42,
+		},
+		false,
+	},
+
+	{
+		"struct field exported, tagged",
+		struct {
+			Foo int `sentinel:"foo_bar"`
+		}{Foo: 42},
+		map[string]int8{
+			"foo_bar": 42,
+		},
+		false,
+	},
+
+	{
+		"struct field exported, camel case",
+		struct{ FooBarBaz int }{FooBarBaz: 42},
+		map[string]int8{
+			"foo_bar_baz": 42,
+		},
+		false,
+	},
+
+	{
+		"struct field unexported",
+		struct {
+			foo int `sentinel:"foo"`
+		}{foo: 42},
+		map[string]interface{}{},
+		false,
+	},
+
+	//-----------------------------------------------------------
+	// Null
 
 	{
 		"null to null",
