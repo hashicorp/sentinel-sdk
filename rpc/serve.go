@@ -1,6 +1,10 @@
 package rpc
 
 import (
+	"math"
+
+	"google.golang.org/grpc"
+
 	goplugin "github.com/hashicorp/go-plugin"
 	"github.com/hashicorp/sentinel-sdk"
 )
@@ -43,7 +47,11 @@ func Serve(opts *ServeOpts) {
 	goplugin.Serve(&goplugin.ServeConfig{
 		HandshakeConfig: Handshake,
 		Plugins:         pluginMap(opts),
-		GRPCServer:      goplugin.DefaultGRPCServer,
+		GRPCServer: func(opts []grpc.ServerOption) *grpc.Server {
+			opts = append(opts, grpc.MaxRecvMsgSize(math.MaxInt32))
+			opts = append(opts, grpc.MaxSendMsgSize(math.MaxInt32))
+			return goplugin.DefaultGRPCServer(opts)
+		},
 	})
 }
 
