@@ -2,11 +2,13 @@ package rpc
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
 	"github.com/hashicorp/sentinel-sdk/proto/go"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 // ImportGRPCClient is a gRPC server for Imports.
@@ -89,9 +91,14 @@ func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) 
 		})
 	}
 
-	resp, err := m.Client.Get(context.Background(), &proto.Get_MultiRequest{
-		Requests: reqs,
-	})
+	resp, err := m.Client.Get(
+		context.Background(),
+		&proto.Get_MultiRequest{
+			Requests: reqs,
+		},
+		grpc.MaxRecvMsgSizeCallOption{MaxRecvMsgSize: math.MaxInt32},
+		grpc.MaxSendMsgSizeCallOption{MaxSendMsgSize: math.MaxInt32},
+	)
 	if err != nil {
 		return nil, err
 	}
