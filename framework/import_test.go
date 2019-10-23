@@ -584,6 +584,38 @@ func TestImportGet(t *testing.T) {
 		},
 
 		{
+			"key get result is a namespace that does not implement map",
+			&rootEmbedNamespace{
+				&nsKeyValue{
+					Key: "foo",
+					Value: &nsKeyValue{
+						Key:   "one",
+						Value: "two",
+					},
+				},
+			},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+					Value: &nsKeyValue{
+						Key:   "one",
+						Value: "two",
+					},
+				},
+			},
+			"",
+		},
+
+		{
 			"key call",
 			&rootEmbedCall{&nsCall{
 				F: func(v string) (interface{}, error) {
