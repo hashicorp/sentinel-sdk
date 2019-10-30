@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"text/scanner"
 
 	"github.com/mitchellh/go-testing-interface"
 )
@@ -65,6 +66,84 @@ type TestImportCase struct {
 	// Sentinel output is searched for the string given here. If a match is
 	// found, the test passes. If it is not found the test will fail.
 	Error string
+}
+
+// LoadTestImportCase is used to load a TestImportCase from a Sentinel policy
+// file. The policy file is expected to begin with comments in the first
+// line. Certain configuration options are supported in the comment body. The
+// following is a completely valid example:
+//
+//     // config: {"option1": "value1"}
+//     // error: failed to do the thing
+//     main = rule { true }
+//
+// The above would load a TestImport case using the specified options. The
+// config is loaded as a JSON string and unmarshaled into the Config field.
+// The error field is loaded as a string into the Error field.
+//
+// This makes boilerplate very simple for a large number of Sentinel tests,
+// and allows an entire test to be captured neatly into a single file which
+// also happens to be the policy being tested.
+func LoadTestImportCase(t testing.T, path string) TestImportCase {
+	fh, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("error opening policy: %v", err)
+	}
+	defer fh.Close()
+
+	var s scanner.Scanner
+	s.Init(fh)
+	s.Mode ^= scanner.SkipComments
+
+	var errMatch string
+	var configStr string
+
+	for tok := s.Scan(); tok != scanner.EOF; tok = s.Scan() {
+		raw := s.TokenText()
+		content := strings.TrimPrefix(raw, "// ")
+
+		// Make sure we are still in the top comments.
+		if raw == content {
+			break
+		}
+
+		parts := strings.SplitN(content, ":", 2)
+		if len(parts) < 2 {
+			continue
+		}
+
+		switch parts[0] {
+		case "error":
+			errMatch = strings.TrimSpace(parts[1])
+		case "config":
+			configStr = strings.TrimSpace(parts[1])
+		default:
+			t.Fatalf("unsupported magic comment: %q", parts[0])
+		}
+	}
+
+	if _, err := fh.Seek(0, 0); err != nil {
+		t.Fatal(err)
+	}
+
+	policyBytes, err := ioutil.ReadAll(fh)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tc := TestImportCase{
+		Source: string(policyBytes),
+		Error:  errMatch,
+	}
+
+	if configStr != "" {
+		tc.Config = make(map[string]interface{})
+		if err := json.Unmarshal([]byte(configStr), &tc.Config); err != nil {
+			t.Fatalf("error decoding configuration: %v", err)
+		}
+	}
+
+	return tc
 }
 
 // Clean cleans any temporary files created. This should always be called
