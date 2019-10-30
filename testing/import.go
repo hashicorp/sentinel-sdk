@@ -11,9 +11,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"testing"
 	"text/scanner"
-
-	"github.com/mitchellh/go-testing-interface"
 )
 
 //go:generate go-bindata -nomemcopy -pkg=testing ./data/...
@@ -84,7 +83,7 @@ type TestImportCase struct {
 // This makes boilerplate very simple for a large number of Sentinel tests,
 // and allows an entire test to be captured neatly into a single file which
 // also happens to be the policy being tested.
-func LoadTestImportCase(t testing.T, path string) TestImportCase {
+func LoadTestImportCase(t *testing.T, path string) TestImportCase {
 	fh, err := os.Open(path)
 	if err != nil {
 		t.Fatalf("error opening policy: %v", err)
@@ -146,6 +145,39 @@ func LoadTestImportCase(t testing.T, path string) TestImportCase {
 	return tc
 }
 
+func TestDirectory(t *testing.T, path string, customize func(*TestImportCase)) {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cases := make(map[string]TestImportCase)
+	for _, fi := range files {
+		// Allow the directory to be structured.
+		if fi.IsDir() {
+			continue
+		}
+
+		// Load the sentinel file and parse it.
+		fp := filepath.Join(path, fi.Name())
+		tc := LoadTestImportCase(t, fp)
+
+		// If a customization function was provided, execute it.
+		if customize != nil {
+			customize(&tc)
+		}
+
+		// Add the test to the set.
+		cases[fi.Name()] = tc
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			TestImport(t, tc)
+		})
+	}
+}
+
 // Clean cleans any temporary files created. This should always be called
 // at the end of any set of import tests.
 func Clean() {
@@ -160,7 +192,7 @@ func Clean() {
 }
 
 // TestImport tests that a sdk.Import implementation works as expected.
-func TestImport(t testing.T, c TestImportCase) {
+func TestImport(t *testing.T, c TestImportCase) {
 	// Infer the path
 	path, err := ImportPath(c.ImportPath)
 	if err != nil {
@@ -314,7 +346,7 @@ func ImportPath(dir string) (string, error) {
 
 // buildImport compiles the import binary with the given Go import path.
 // The path to the completed binary is inserted into the global importMap.
-func buildImport(t testing.T, path string) string {
+func buildImport(t *testing.T, path string) string {
 	log.Printf("Building binary: %s", path)
 
 	// Create the main.go
