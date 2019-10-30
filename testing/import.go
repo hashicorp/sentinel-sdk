@@ -11,8 +11,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"testing"
 	"text/scanner"
+
+	"github.com/mitchellh/go-testing-interface"
 )
 
 //go:generate go-bindata -nomemcopy -pkg=testing ./data/...
@@ -83,7 +84,7 @@ type TestImportCase struct {
 // This makes boilerplate very simple for a large number of Sentinel tests,
 // and allows an entire test to be captured neatly into a single file which
 // also happens to be the policy being tested.
-func LoadTestImportCase(t *testing.T, path string) TestImportCase {
+func LoadTestImportCase(t testing.T, path string) TestImportCase {
 	fh, err := os.Open(path)
 	if err != nil {
 		t.Fatalf("error opening policy: %v", err)
@@ -145,7 +146,7 @@ func LoadTestImportCase(t *testing.T, path string) TestImportCase {
 	return tc
 }
 
-func TestDirectory(t *testing.T, path string, customize func(*TestImportCase)) {
+func TestDirectory(t testing.T, path string, customize func(*TestImportCase)) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		t.Fatal(err)
@@ -172,9 +173,12 @@ func TestDirectory(t *testing.T, path string, customize func(*TestImportCase)) {
 	}
 
 	for name, tc := range cases {
-		t.Run(name, func(t *testing.T) {
-			TestImport(t, tc)
-		})
+		// This would be nice but the interface doesn't have Run() yet.
+		//t.Run(name, func(t testing.T) {
+		//	TestImport(t, tc)
+		//})
+		t.Log(name)
+		TestImport(t, tc)
 	}
 }
 
@@ -192,7 +196,7 @@ func Clean() {
 }
 
 // TestImport tests that a sdk.Import implementation works as expected.
-func TestImport(t *testing.T, c TestImportCase) {
+func TestImport(t testing.T, c TestImportCase) {
 	// Infer the path
 	path, err := ImportPath(c.ImportPath)
 	if err != nil {
@@ -346,7 +350,7 @@ func ImportPath(dir string) (string, error) {
 
 // buildImport compiles the import binary with the given Go import path.
 // The path to the completed binary is inserted into the global importMap.
-func buildImport(t *testing.T, path string) string {
+func buildImport(t testing.T, path string) string {
 	log.Printf("Building binary: %s", path)
 
 	// Create the main.go
