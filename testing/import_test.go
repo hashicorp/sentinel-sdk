@@ -94,7 +94,7 @@ func TestTestImport(t *testing.T) {
 
 	// TestDirectory helper
 	t.Run("directory", func(t *testing.T) {
-		TestDirectory(t, "testdata/import-test-dir", func(tc *TestImportCase) {
+		TestImportDir(t, "testdata/import-test-dir", func(tc *TestImportCase) {
 			tc.ImportPath = path
 			tc.Global = map[string]interface{}{"exclamation": "!"}
 		})

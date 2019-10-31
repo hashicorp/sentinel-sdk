@@ -69,9 +69,8 @@ type TestImportCase struct {
 }
 
 // LoadTestImportCase is used to load a TestImportCase from a Sentinel policy
-// file. The policy file is expected to begin with comments in the first
-// line. Certain configuration options are supported in the comment body. The
-// following is a completely valid example:
+// file. Certain test case pragmas are supported in the top-most comment body.
+// The following is a completely valid example:
 //
 //     //config: {"option1": "value1"}
 //     //error: failed to do the thing
@@ -79,10 +78,9 @@ type TestImportCase struct {
 //
 // The above would load a TestImport case using the specified options. The
 // config is loaded as a JSON string and unmarshaled into the Config field.
-// The error field is loaded as a string into the Error field. The 'config'
-// and/or 'error' pragmas *must* be at the very top of the file, starting at
-// line one. When a non-pragma line is encountered, parsing will end and any
-// further comments are disregarded.
+// The error field is loaded as a string into the Error field. Pragmas *must*
+// be at the very top of the file, starting at line one. When a non-pragma
+// line is encountered, parsing will end and any further pragmas are discarded.
 //
 // This makes boilerplate very simple for a large number of Sentinel tests,
 // and allows an entire test to be captured neatly into a single file which
@@ -149,9 +147,10 @@ func LoadTestImportCase(t testing.T, path string) TestImportCase {
 	return tc
 }
 
-// TestDirectory iterates over files in a directory, calls LoadTestImportCase
-// on each file suffixed with ".sentinel", and executes all of the import tests.
-func TestDirectory(t testing.T, path string, customize func(*TestImportCase)) {
+// TestImportDir iterates over files in a directory, calls
+// LoadTestImportCase on each file suffixed with ".sentinel", and executes all
+// of the import tests.
+func TestImportDir(t testing.T, path string, customize func(*TestImportCase)) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		t.Fatal(err)
