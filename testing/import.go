@@ -79,7 +79,10 @@ type TestImportCase struct {
 //
 // The above would load a TestImport case using the specified options. The
 // config is loaded as a JSON string and unmarshaled into the Config field.
-// The error field is loaded as a string into the Error field.
+// The error field is loaded as a string into the Error field. The 'config'
+// and/or 'error' pragmas *must* be at the very top of the file, starting at
+// line one. When a non-pragma line is encountered, parsing will end and any
+// further comments are disregarded.
 //
 // This makes boilerplate very simple for a large number of Sentinel tests,
 // and allows an entire test to be captured neatly into a single file which
