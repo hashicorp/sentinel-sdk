@@ -73,8 +73,8 @@ type TestImportCase struct {
 // line. Certain configuration options are supported in the comment body. The
 // following is a completely valid example:
 //
-//     // config: {"option1": "value1"}
-//     // error: failed to do the thing
+//     //config: {"option1": "value1"}
+//     //error: failed to do the thing
 //     main = rule { true }
 //
 // The above would load a TestImport case using the specified options. The
@@ -100,7 +100,7 @@ func LoadTestImportCase(t testing.T, path string) TestImportCase {
 
 	for tok := s.Scan(); tok != scanner.EOF; tok = s.Scan() {
 		raw := s.TokenText()
-		content := strings.TrimPrefix(raw, "// ")
+		content := strings.TrimPrefix(raw, "//")
 
 		// Make sure we are still in the top comments.
 		if raw == content {
@@ -118,7 +118,7 @@ func LoadTestImportCase(t testing.T, path string) TestImportCase {
 		case "config":
 			configStr = strings.TrimSpace(parts[1])
 		default:
-			t.Fatalf("unsupported magic comment: %q", parts[0])
+			break // Require magic comments to be at the top.
 		}
 	}
 
@@ -146,6 +146,8 @@ func LoadTestImportCase(t testing.T, path string) TestImportCase {
 	return tc
 }
 
+// TestDirectory iterates over files in a directory, calls LoadTestImportCase
+// on each file suffixed with ".sentinel", and executes all of the import tests.
 func TestDirectory(t testing.T, path string, customize func(*TestImportCase)) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -156,6 +158,11 @@ func TestDirectory(t testing.T, path string, customize func(*TestImportCase)) {
 	for _, fi := range files {
 		// Allow the directory to be structured.
 		if fi.IsDir() {
+			continue
+		}
+
+		// Only use files ending with '.sentinel'
+		if !strings.HasSuffix(fi.Name(), ".sentinel") {
 			continue
 		}
 
@@ -172,12 +179,13 @@ func TestDirectory(t testing.T, path string, customize func(*TestImportCase)) {
 		cases[fi.Name()] = tc
 	}
 
-	for name, tc := range cases {
-		// This would be nice but the interface doesn't have Run() yet.
-		//t.Run(name, func(t testing.T) {
-		//	TestImport(t, tc)
-		//})
-		t.Log(name)
+	// Run all of the tests.
+	for file, tc := range cases {
+		// The testing interface (mitchellh/go-testing-interface) doesn't
+		// support a t.Run(), and adding context about which policy is failing
+		// to the error is obtuse otherwise, so we'll just log the policy file
+		// name here to give that context to the developer.
+		t.Logf("Checking %s", file)
 		TestImport(t, tc)
 	}
 }
