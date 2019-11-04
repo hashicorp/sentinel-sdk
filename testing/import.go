@@ -54,6 +54,12 @@ type TestImportCase struct {
 	// per test run.
 	ImportPath string
 
+	// ImportName allows passing a custom name for the import to be used in
+	// test cases. By default, the import is simply named "subject". The
+	// import name is what is used within this policy's source to access
+	// functionality provided by the import.
+	ImportName string
+
 	// A string containing any expected runtime error during evaluation. If
 	// this field is non-empty, a runtime error is expected to occur, and the
 	// Sentinel output is searched for the string given here. If a match is
@@ -94,7 +100,11 @@ func TestImport(t testing.T, c TestImportCase) {
 	}
 
 	// Build the full source which requires importing the subject
-	src := "import \"subject\"\n\n" + c.Source
+	src := `import "subject"`
+	if c.ImportName != "" {
+		src += " as " + c.ImportName
+	}
+	src += "\n\n" + c.Source
 
 	// Make the test directory where we'll run the test.
 	td, err := ioutil.TempDir("", "sentinel-sdk")

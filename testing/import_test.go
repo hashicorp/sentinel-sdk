@@ -84,4 +84,11 @@ func TestTestImport(t *testing.T) {
 		})
 	})
 
+	t.Run("custom import name", func(t *testing.T) {
+		TestImport(t, TestImportCase{
+			ImportPath: path,
+			ImportName: "foo",
+			Source:     `main = foo.bar is "bar!!"`,
+		})
+	})
 }
