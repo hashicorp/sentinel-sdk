@@ -1,0 +1,2 @@
+// This policy should not be executed as it is in a subdirectory.
+main = rule { false }

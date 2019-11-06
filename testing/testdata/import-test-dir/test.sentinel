@@ -1,0 +1,6 @@
+//config: {"suffix": " world"}
+//error: hello world!
+
+main = rule {
+    error(subject.hello + exclamation)
+}

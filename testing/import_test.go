@@ -91,4 +91,12 @@ func TestTestImport(t *testing.T) {
 			Source:     `main = foo.bar is "bar!!"`,
 		})
 	})
+
+	// TestDirectory helper
+	t.Run("directory", func(t *testing.T) {
+		TestImportDir(t, "testdata/import-test-dir", func(tc *TestImportCase) {
+			tc.ImportPath = path
+			tc.Global = map[string]interface{}{"exclamation": "!"}
+		})
+	})
 }
