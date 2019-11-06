@@ -1,0 +1,5 @@
+//error: /hello \w+!/
+
+main = rule {
+	error("hello world" + exclamation)
+}
