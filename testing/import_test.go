@@ -53,6 +53,32 @@ func TestTestImport(t *testing.T) {
 		})
 	})
 
+	// Test runtime error w/ regular expression
+	t.Run("error with regex", func(t *testing.T) {
+		TestImport(&testingiface.RuntimeT{}, TestImportCase{
+			ImportPath: path,
+			Source:     `main = rule { error("super 1337 error") }`,
+			Error:      `/super \d+ error/`,
+		})
+	})
+
+	// Test runtime error w/ errored regular expression
+	t.Run("error with errored regex", func(t *testing.T) {
+		// Use a defer to catch a panic that RuntimeT will throw. We can
+		// detect the failure this way.
+		defer func() {
+			if e := recover(); e == nil {
+				t.Fatal("should fail")
+			}
+		}()
+
+		TestImport(&testingiface.RuntimeT{}, TestImportCase{
+			ImportPath: path,
+			Source:     `main = rule { error("super 1337 error") }`,
+			Error:      `/(super \d+ error/`,
+		})
+	})
+
 	// Test configuration
 	t.Run("config", func(t *testing.T) {
 		TestImport(t, TestImportCase{

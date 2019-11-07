@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/scanner"
 
@@ -62,9 +63,16 @@ type TestImportCase struct {
 	ImportName string
 
 	// A string containing any expected runtime error during evaluation. If
-	// this field is non-empty, a runtime error is expected to occur, and the
-	// Sentinel output is searched for the string given here. If a match is
-	// found, the test passes. If it is not found the test will fail.
+	// this field is non-empty, a runtime error is expected to occur, and
+	// the Sentinel output is searched for the string given here. If the
+	// output contains the string, the test passes. If it does not contain
+	// the string, the test will fail.
+	//
+	// More advanced matches can be done with regular expression patterns.
+	// If the Error string is delimited by slashes (/), the string is
+	// compiled as a regular expression and the Sentinel output is matched
+	// against the resulting pattern. If a match is found, the test passes.
+	// If it does not match, the tests will fail.
 	Error string
 }
 
@@ -187,7 +195,7 @@ func TestImportDir(t testing.T, path string, customize func(*TestImportCase)) {
 		// support a t.Run(), and adding context about which policy is failing
 		// to the error is obtuse otherwise, so we'll just log the policy file
 		// name here to give that context to the developer.
-		t.Logf("Checking %s", file)
+		t.Logf("Checking %s ...", file)
 		TestImport(t, tc)
 	}
 }
@@ -269,9 +277,21 @@ func TestImport(t testing.T, c TestImportCase) {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if c.Error != "" {
-			if !strings.Contains(string(output), c.Error) {
-				t.Fatalf("expected error %q not found:\n\n%s",
-					c.Error, string(output))
+			if c.Error[:1]+c.Error[len(c.Error)-1:] == "//" {
+				pattern := c.Error[1 : len(c.Error)-1]
+				exp, err := regexp.Compile(pattern)
+				if err != nil {
+					t.Fatalf("error compiling expected error pattern: %s", err)
+				}
+				if !exp.Match(output) {
+					t.Fatalf("the resulting error does not match the expected pattern: %s\n\nError output:\n\n%s",
+						c.Error, string(output))
+				}
+			} else {
+				if !strings.Contains(string(output), c.Error) {
+					t.Fatalf("resulting error does not contain %q\n\nError output:\n\n%s",
+						c.Error, string(output))
+				}
 			}
 		} else {
 			t.Fatalf("error executing test. output:\n\n%s", string(output))
