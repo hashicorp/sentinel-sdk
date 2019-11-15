@@ -109,8 +109,7 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 				v, err := m.call(x.Func(k.Key), k.Args)
 				if err != nil {
 					return nil, fmt.Errorf(
-						"error calling function %q: %s",
-						strings.Join(req.GetKeys()[:i+1], "."), err)
+						"error calling function %q: %s", k.Key, err)
 				}
 
 				result = v
