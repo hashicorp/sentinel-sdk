@@ -1026,7 +1026,7 @@ func TestImportGet(t *testing.T) {
 				},
 			},
 			nil,
-			`error calling function "foo.bar": foo`,
+			`error calling function "bar": foo`,
 		},
 
 		{

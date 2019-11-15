@@ -96,7 +96,6 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 
 		// For each key, perform a get
 		var result interface{} = ns
-		var previousCall = false
 		for i, k := range req.Keys {
 			// If we have arguments at this level, perform a function call.
 			if k.Call() {
@@ -109,28 +108,13 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 
 				v, err := m.call(x.Func(k.Key), k.Args)
 				if err != nil {
-					if previousCall {
-						// If the previous key level was a function call, don't
-						// emit the full key path in the error message as it
-						// likely won't make sense.
-						return nil, fmt.Errorf(
-							"error calling function %q: %s", k.Key, err)
-					} else {
-						// The previous key level was a simple value. In this
-						// case it makes sense to emit the full key path.
-						return nil, fmt.Errorf(
-							"error calling function %q: %s",
-							strings.Join(req.GetKeys()[:i+1], "."), err)
-					}
+					return nil, fmt.Errorf(
+						"error calling function %q: %s", k.Key, err)
 				}
 
 				result = v
-				previousCall = true
 				continue
 			}
-
-			// Mark that this key level is a non-function.
-			previousCall = false
 
 			switch x := result.(type) {
 			// For namespaces, we get the next value in the chain
