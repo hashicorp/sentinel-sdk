@@ -1120,7 +1120,7 @@ func TestImportGet(t *testing.T) {
 				},
 			},
 			nil,
-			`error calling function "foo.bar": expected: 2, 3; got: 42, 43`,
+			`error calling function "bar": expected: 2, 3; got: 42, 43`,
 		},
 
 		{
