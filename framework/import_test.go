@@ -197,6 +197,30 @@ func TestImportGet(t *testing.T) {
 		},
 
 		{
+			"key get slice with nil value",
+			&rootEmbedNamespace{&nsKeyValue{
+				Key:   "foo",
+				Value: []interface{}{nil},
+			}},
+			[]*sdk.GetReq{
+				{
+					Keys: []sdk.GetKey{
+						{Key: "foo"},
+					},
+					KeyId: 42,
+				},
+			},
+			[]*sdk.GetResult{
+				{
+					Keys:  []string{"foo"},
+					KeyId: 42,
+					Value: []interface{}{nil},
+				},
+			},
+			"",
+		},
+
+		{
 			"key get map with nil value, full key in get request",
 			&rootEmbedNamespace{&nsKeyValue{
 				Key: "foo",
