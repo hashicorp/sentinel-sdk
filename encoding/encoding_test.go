@@ -177,6 +177,13 @@ var encodingTests = []struct {
 		true,
 	},
 
+	{
+		"slice with null value",
+		[]interface{}{nil},
+		[]interface{}{sdk.Null},
+		false,
+	},
+
 	//-----------------------------------------------------------
 	// Bool
 

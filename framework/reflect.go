@@ -99,6 +99,12 @@ func (m *Import) reflectSlice(v reflect.Value) (reflect.Value, error) {
 			return v, err
 		}
 
+		// If the value isn't valid, we set the value of the element to
+		// the zero value for the proper type.
+		if !newElem.IsValid() {
+			newElem = reflect.Zero(v.Type().Elem())
+		}
+
 		elem.Set(newElem)
 	}
 
