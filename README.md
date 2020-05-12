@@ -15,7 +15,7 @@ implementing the
 over gRPC.
 
 To get started writing a Sentinel import, we recommend reading the [extending
-Sentinel](https://docs.hashicorp.com/sentinel/extending/dev) guide.
+Sentinel](https://docs.hashicorp.com/sentinel/extending/) guide.
 
 You can also view the import API via
 [GoDoc](https://godoc.org/github.com/hashicorp/sentinel-sdk).
