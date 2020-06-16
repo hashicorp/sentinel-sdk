@@ -4,8 +4,12 @@ import (
 	"reflect"
 )
 
-// mapTyp is a reflect.Type for Map.
-var mapTyp = reflect.TypeOf((*Map)(nil)).Elem()
+// various convenience types for reflect calls
+var (
+	mapTyp            = reflect.TypeOf((*Map)(nil)).Elem()
+	mapInterfaceTyp   = reflect.TypeOf(map[string]interface{}{})
+	sliceInterfaceTyp = reflect.TypeOf([]interface{}{})
+)
 
 // Reflect takes a value and uses reflection to traverse the value, finding
 // any further namespaces that need to be converted to types that can be
@@ -73,6 +77,19 @@ func (m *Import) reflectValue(v reflect.Value) (reflect.Value, error) {
 }
 
 func (m *Import) reflectMap(mv reflect.Value) (reflect.Value, error) {
+	// Create a new map for this. This avoids conflicts and panics on shared
+	// data, and ensures we aren't altering data in the original namespace.
+	// map[string]interface{} is always used, regardless of the actual type of
+	// the map sent along. This prevents type panics.
+	//
+	// Do a quick check to see if we have a zero-value map (nil map). If we do,
+	// return that.
+	if mv.IsZero() {
+		return mv, nil
+	}
+
+	// Otherwise make a map and proceed with copy.
+	result := reflect.MakeMapWithSize(mapInterfaceTyp, mv.Len())
 	for _, k := range mv.MapKeys() {
 		v, err := m.reflectValue(mv.MapIndex(k))
 		if err != nil {
@@ -85,13 +102,26 @@ func (m *Import) reflectMap(mv reflect.Value) (reflect.Value, error) {
 			v = reflect.Zero(mv.Type().Elem())
 		}
 
-		mv.SetMapIndex(k, v)
+		result.SetMapIndex(k, v)
 	}
 
-	return mv, nil
+	return result, nil
 }
 
 func (m *Import) reflectSlice(v reflect.Value) (reflect.Value, error) {
+	// Create a new map for this. This avoids conflicts and panics on shared
+	// data, and ensures that we aren't altering data in the original namespace.
+	// []interface{} is always used, regardless of the actual type of the map
+	// sent along. This prevents type panics.
+	//
+	// Do a quick check to see if we have a zero-value map (nil map). If we do,
+	// return that.
+	if v.IsZero() {
+		return v, nil
+	}
+
+	// Otherwise make a slice and proceed with copy.
+	result := reflect.MakeSlice(sliceInterfaceTyp, v.Len(), v.Cap())
 	for i := 0; i < v.Len(); i++ {
 		elem := v.Index(i)
 		newElem, err := m.reflectValue(elem)
@@ -105,8 +135,8 @@ func (m *Import) reflectSlice(v reflect.Value) (reflect.Value, error) {
 			newElem = reflect.Zero(v.Type().Elem())
 		}
 
-		elem.Set(newElem)
+		result.Index(i).Set(newElem)
 	}
 
-	return v, nil
+	return result, nil
 }
