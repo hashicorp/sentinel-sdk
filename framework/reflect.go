@@ -7,7 +7,7 @@ import (
 // various convenience types for reflect calls
 var (
 	mapTyp            = reflect.TypeOf((*Map)(nil)).Elem()
-	mapInterfaceTyp   = reflect.TypeOf(map[string]interface{}{})
+	interfaceTyp      = reflect.TypeOf((*interface{})(nil)).Elem()
 	sliceInterfaceTyp = reflect.TypeOf([]interface{}{})
 )
 
@@ -89,7 +89,9 @@ func (m *Import) reflectMap(mv reflect.Value) (reflect.Value, error) {
 	}
 
 	// Otherwise make a map and proceed with copy.
-	result := reflect.MakeMapWithSize(mapInterfaceTyp, mv.Len())
+	//
+	// Preserve key type from the original map.
+	result := reflect.MakeMapWithSize(reflect.MapOf(mv.Type().Key(), interfaceTyp), mv.Len())
 	for _, k := range mv.MapKeys() {
 		v, err := m.reflectValue(mv.MapIndex(k))
 		if err != nil {
@@ -109,10 +111,11 @@ func (m *Import) reflectMap(mv reflect.Value) (reflect.Value, error) {
 }
 
 func (m *Import) reflectSlice(v reflect.Value) (reflect.Value, error) {
-	// Create a new map for this. This avoids conflicts and panics on shared
-	// data, and ensures that we aren't altering data in the original namespace.
-	// []interface{} is always used, regardless of the actual type of the map
-	// sent along. This prevents type panics.
+	// Create a new slice for this. This avoids conflicts and panics on
+	// shared data, and ensures that we aren't altering data in the
+	// original namespace. []interface{} is always used, regardless of
+	// the actual type of the value sent along. This prevents type
+	// panics.
 	//
 	// Do a quick check to see if we have a zero-value map (nil map). If we do,
 	// return that.

@@ -166,6 +166,34 @@ var getCases = []struct {
 	},
 
 	{
+		"key get map with int key",
+		&rootEmbedNamespace{&nsKeyValue{
+			Key: "foo",
+			Value: map[int]interface{}{
+				42: "bar",
+			},
+		}},
+		[]*sdk.GetReq{
+			{
+				Keys: []sdk.GetKey{
+					{Key: "foo"},
+				},
+				KeyId: 42,
+			},
+		},
+		[]*sdk.GetResult{
+			{
+				Keys:  []string{"foo"},
+				KeyId: 42,
+				Value: map[int]interface{}{
+					42: "bar",
+				},
+			},
+		},
+		"",
+	},
+
+	{
 		"key get map with nil value",
 		&rootEmbedNamespace{&nsKeyValue{
 			Key: "foo",
