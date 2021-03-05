@@ -1,7 +1,7 @@
 GOTOOLS = \
-	github.com/golang/protobuf/protoc-gen-go \
-	github.com/vektra/mockery/cmd/mockery \
-	gotest.tools/gotestsum
+	github.com/golang/protobuf/protoc-gen-go@latest \
+	github.com/vektra/mockery/cmd/mockery@latest \
+	gotest.tools/gotestsum@latest
 
 SENTINEL_VERSION = 0.15.1
 SENTINEL_BIN_PATH := $(shell go env GOPATH)/bin
@@ -20,7 +20,7 @@ test-circle:
 	gotestsum --format=short-verbose --junitfile test-results/sentinel-sdk/results.xml
 
 tools:
-	go install $(GOTOOLS)
+	@echo $(GOTOOLS) | xargs -t -n1 go install
 
 $(SENTINEL_BIN_PATH)/sentinel:
 	gpg --import .circleci/hashicorp.gpg && \
