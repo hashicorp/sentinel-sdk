@@ -1,6 +1,6 @@
 # Sentinel Import SDK
 
-[![CircleCI](https://circleci.com/gh/hashicorp/sentinel-sdk/tree/master.svg?style=svg)](https://circleci.com/gh/hashicorp/sentinel-sdk/tree/master)
+[![CircleCI](https://circleci.com/gh/hashicorp/sentinel-sdk/tree/main.svg?style=svg)](https://circleci.com/gh/hashicorp/sentinel-sdk/tree/main)
 [![GoDoc](https://godoc.org/github.com/hashicorp/sentinel-sdk?status.svg)](https://godoc.org/github.com/hashicorp/sentinel-sdk)
 
 This repository contains the [Sentinel](https://www.hashicorp.com/sentinel)
@@ -11,7 +11,7 @@ Sentinel imports can be written in any language, but the recommended language is
 [Go](https://golang.org/). We provide a high-level framework to make writing
 imports in Go extremely easy. For other languages, imports can be written by
 implementing the
-[protocol](https://github.com/hashicorp/sentinel-sdk/blob/master/proto/import.proto)
+[protocol](https://github.com/hashicorp/sentinel-sdk/blob/main/proto/import.proto)
 over gRPC.
 
 To get started writing a Sentinel import, we recommend reading the [extending
