@@ -21,6 +21,7 @@ test-circle:
 
 tools:
 	@echo $(GOTOOLS) | xargs -t -n1 go install
+	go mod tidy
 
 $(SENTINEL_BIN_PATH)/sentinel:
 	gpg --import .circleci/hashicorp.gpg && \
