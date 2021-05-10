@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 )
 
 func TestEncoding(t *testing.T) {
@@ -125,6 +125,17 @@ var encodingTests = []struct {
 		},
 		map[string]interface{}{
 			"foo": sdk.Null,
+		},
+		false,
+	},
+
+	{
+		"map with empty map",
+		map[string]interface{}{
+			"foo": map[interface{}]interface{}{},
+		},
+		map[string]interface{}{
+			"foo": map[string]interface{}{},
 		},
 		false,
 	},
