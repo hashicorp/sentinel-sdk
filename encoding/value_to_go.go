@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/hashicorp/sentinel-sdk"
-	"github.com/hashicorp/sentinel-sdk/proto/go"
+	sdk "github.com/hashicorp/sentinel-sdk"
+	proto "github.com/hashicorp/sentinel-sdk/proto/go"
 )
 
 var (
@@ -247,6 +247,14 @@ func convertValueMap(raw *proto.Value, t reflect.Type) (interface{}, error) {
 	m := raw.Value.(*proto.Value_ValueMap).ValueMap
 	keyTyp := t.Key()
 	elemTyp := t.Elem()
+	if len(m.Elems) == 0 {
+		// as we have no elements, it is much safer to presume a key type of
+		// string to ensure safety when attempting to perform actions such
+		// as json marshalling
+		mapType := reflect.MapOf(reflect.TypeOf(""), elemTyp)
+		return reflect.MakeMap(mapType).Interface(), nil
+	}
+
 	mapVal := reflect.MakeMap(t)
 	for _, elt := range m.Elems {
 		// Convert the key
