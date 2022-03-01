@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"text/scanner"
 
@@ -414,8 +415,14 @@ func buildImport(t testing.T, path string) string {
 		t.Fatalf("err: %s", err)
 	}
 
-	// Build
-	cmd := exec.Command("go", "build", "-o", "import-test")
+	// Build.  Note that when running on Windows systems the
+	// import will need an .EXE extension
+	buildOutput := "import-test"
+	if isWindows() {
+		buildOutput += ".exe"
+	}
+
+	cmd := exec.Command("go", "build", "-o", buildOutput)
 	cmd.Dir = td
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -424,7 +431,11 @@ func buildImport(t testing.T, path string) string {
 	}
 
 	// Record it
-	importMap[path] = filepath.Join(td, "import-test")
+	importMap[path] = filepath.Join(td, buildOutput)
 	log.Printf("Import binary built at: %s", importMap[path])
 	return importMap[path]
+}
+
+func isWindows() bool {
+	return runtime.GOOS == "windows"
 }
