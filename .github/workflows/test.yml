@@ -15,7 +15,7 @@ jobs:
   test:
     needs:
       - get-go-version
-    runs-on: [ self-hosted, linux ]
+    runs-on: [ ubuntu-latest ]
     name: Tests
 
     steps:
