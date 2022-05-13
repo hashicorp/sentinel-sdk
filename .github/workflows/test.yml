@@ -10,7 +10,7 @@ env:
 
 jobs:
   get-go-version:
-    uses: hashicorp/tf-compliance-actions/.github/workflows/get-go-version.yml@main
+    uses: ./.github/workflows/get-go-version.yml
 
   test:
     needs:
