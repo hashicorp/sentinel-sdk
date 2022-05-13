@@ -1,6 +1,6 @@
 # Sentinel Import SDK
 
-[![CircleCI](https://circleci.com/gh/hashicorp/sentinel-sdk/tree/main.svg?style=svg)](https://circleci.com/gh/hashicorp/sentinel-sdk/tree/main)
+![Tests](https://github.com/hashicorp/sentinel-sdk/actions/workflows/test.yml/badge.svg)
 [![GoDoc](https://godoc.org/github.com/hashicorp/sentinel-sdk?status.svg)](https://godoc.org/github.com/hashicorp/sentinel-sdk)
 
 This repository contains the [Sentinel](https://www.hashicorp.com/sentinel)

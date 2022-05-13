@@ -1,0 +1,48 @@
+name: Sentinel SDK CI Tests
+
+on: [workflow_dispatch, push]
+
+env:
+  # Increment this to clear GHA cache
+  GHA_CACHE_VERSION: v1
+  # The sentinel version to test against
+  SENTINEL_VERSION: 0.18.9
+
+jobs:
+  get-go-version:
+    uses: ./.github/workflows/get-go-version.yml
+
+  test:
+    needs:
+      - get-go-version
+    runs-on: [ ubuntu-latest ]
+    name: Tests
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ env.GHA_CACHE_VERSION }}-${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ env.GHA_CACHE_VERSION }}-${{ runner.os }}-go-
+      
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+
+      - name: Install sentinel
+        uses: bloominlabs/setup-hashicorp-releases@v1
+        with:
+          package: sentinel
+          version: ${{ env.SENTINEL_VERSION }}
+
+      - name: Test
+        run: |
+          make modules
+          make tools
+          make test-ci

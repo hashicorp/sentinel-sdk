@@ -15,7 +15,7 @@ generate: tools
 modules:
 	go mod download && go mod verify
 
-test-circle:
+test-ci:
 	mkdir -p test-results/sentinel-sdk
 	gotestsum --format=short-verbose --junitfile test-results/sentinel-sdk/results.xml
 
@@ -23,16 +23,4 @@ tools:
 	@echo $(GOTOOLS) | xargs -t -n1 go install
 	go mod tidy
 
-$(SENTINEL_BIN_PATH)/sentinel:
-	gpg --import .circleci/hashicorp.gpg && \
-	cd /tmp && \
-	curl -O https://releases.hashicorp.com/sentinel/${SENTINEL_VERSION}/sentinel_${SENTINEL_VERSION}_linux_amd64.zip && \
-	curl -O https://releases.hashicorp.com/sentinel/${SENTINEL_VERSION}/sentinel_${SENTINEL_VERSION}_SHA256SUMS && \
-	curl -O https://releases.hashicorp.com/sentinel/${SENTINEL_VERSION}/sentinel_${SENTINEL_VERSION}_SHA256SUMS.sig && \
-	gpg --verify sentinel_${SENTINEL_VERSION}_SHA256SUMS.sig && \
-	shasum --check --ignore-missing sentinel_${SENTINEL_VERSION}_SHA256SUMS && \
-	cd $(SENTINEL_BIN_PATH) && \
-	unzip /tmp/sentinel_${SENTINEL_VERSION}_linux_amd64.zip && \
-	cd && which sentinel
-
-.PHONY: test generate modules test-circle tools
+.PHONY: test generate modules test-ci tools
