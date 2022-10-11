@@ -6,7 +6,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.0.0
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
-	google.golang.org/grpc v1.50.0
+	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.28.1
 )
 
