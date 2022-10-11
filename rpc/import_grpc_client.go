@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
-	"github.com/hashicorp/sentinel-sdk/proto/go"
+	proto "github.com/hashicorp/sentinel-sdk/proto/go"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -29,7 +29,7 @@ func (m *ImportGRPCClient) Close() error {
 	return nil
 }
 
-func (m *ImportGRPCClient) Configure(config map[string]interface{}) error {
+func (m *ImportGRPCClient) Configure(config any) error {
 	v, err := encoding.GoToValue(config)
 	if err != nil {
 		return fmt.Errorf("config couldn't be encoded to plugin: %s", err)

@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
-	"github.com/hashicorp/sentinel-sdk/proto/go"
+	proto "github.com/hashicorp/sentinel-sdk/proto/go"
 	"golang.org/x/net/context"
 )
 
@@ -47,18 +47,17 @@ func (m *ImportGRPCServer) Close(
 func (m *ImportGRPCServer) Configure(
 	ctx context.Context, v *proto.Configure_Request) (*proto.Configure_Response, error) {
 	// Build the configuration
-	var config map[string]interface{}
+	var config any
 	configRaw, err := encoding.ValueToGo(v.Config, reflect.TypeOf(config))
 	if err != nil {
 		return nil, fmt.Errorf("error converting config: %s", err)
 	}
-	config = configRaw.(map[string]interface{})
 
 	// Configure is called once to configure a new import. Allocate the import.
 	impt := m.F()
 
 	// Call configure
-	if err := impt.Configure(config); err != nil {
+	if err := impt.Configure(configRaw); err != nil {
 		return nil, err
 	}
 

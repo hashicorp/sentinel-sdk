@@ -3,7 +3,9 @@
 package testimport
 
 import (
-	"github.com/hashicorp/sentinel-sdk"
+	"errors"
+
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/framework"
 )
 
@@ -19,8 +21,12 @@ type root struct {
 }
 
 // framework.Root impl.
-func (m *root) Configure(raw map[string]interface{}) error {
-	if v, ok := raw["suffix"]; ok {
+func (m *root) Configure(raw any) error {
+	rMap, ok := raw.(map[string]interface{})
+	if !ok {
+		return errors.New("must be configured with map")
+	}
+	if v, ok := rMap["suffix"]; ok {
 		m.suffix = v.(string)
 	}
 

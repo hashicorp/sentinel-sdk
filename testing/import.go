@@ -2,6 +2,7 @@ package testing
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,7 +19,8 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 )
 
-//go:generate go-bindata -nomemcopy -pkg=testing ./data/...
+//go:embed data/main.go.tpl
+var template []byte
 
 // importMap is the list of built import binaries keyed by import path.
 // This import path should be canonicalized via ImportPath.
@@ -81,9 +83,9 @@ type TestImportCase struct {
 // file. Certain test case pragmas are supported in the top-most comment body.
 // The following is a completely valid example:
 //
-//     //config: {"option1": "value1"}
-//     //error: failed to do the thing
-//     main = rule { true }
+//	//config: {"option1": "value1"}
+//	//error: failed to do the thing
+//	main = rule { true }
 //
 // The above would load a TestImport case using the specified options. The
 // config is loaded as a JSON string and unmarshaled into the Config field.
@@ -386,7 +388,7 @@ func buildImport(t testing.T, path string) string {
 
 	// Create the main.go
 	main := bytes.Replace(
-		MustAsset("data/main.go.tpl"),
+		template,
 		[]byte("PATH"), []byte(path), -1)
 
 	// If we don't have a build dir, make one

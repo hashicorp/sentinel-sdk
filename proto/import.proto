@@ -1,6 +1,6 @@
 syntax = "proto3";
 package hashicorp.sentinel.proto;
-option go_package = "proto";
+option go_package = "./;proto";
 
 //-------------------------------------------------------------------
 // Import Service
@@ -120,4 +120,3 @@ message Value {
         Map value_map = 7;
     }
 }
-

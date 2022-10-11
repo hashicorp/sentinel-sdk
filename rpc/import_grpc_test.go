@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -12,7 +12,7 @@ func TestImport_gRPC_configure(t *testing.T) {
 	// Create a mock object
 	importMock := new(sdk.MockImport)
 	importMock.On("Configure",
-		map[string]interface{}{"key": int64(42)}).
+		map[string]int64{"key": int64(42)}).
 		Return(nil)
 
 	obj, closer := testImportServeGRPC(t, importMock)
@@ -115,7 +115,7 @@ func TestImport_gRPC_get(t *testing.T) {
 		tc := tc
 		t.Run(tc.Name, func(t *testing.T) {
 			importMock := new(sdk.MockImport)
-			importMock.On("Configure", map[string]interface{}{}).Return(nil)
+			importMock.On("Configure", sdk.Null).Return(nil)
 			importMock.On("Get",
 				mock.MatchedBy(func(reqs []*sdk.GetReq) bool {
 					if len(tc.Requests) != len(reqs) {

@@ -73,17 +73,17 @@ func TestImportConfigure_noNamespace(t *testing.T) {
 
 type rootNoImpl struct{}
 
-func (r *rootNoImpl) Configure(map[string]interface{}) error { return nil }
+func (r *rootNoImpl) Configure(any) error { return nil }
 
 type rootNamespace struct{}
 
-func (r *rootNamespace) Configure(map[string]interface{}) error { return nil }
-func (r *rootNamespace) Get(string) (interface{}, error)        { return nil, nil }
+func (r *rootNamespace) Configure(any) error             { return nil }
+func (r *rootNamespace) Get(string) (interface{}, error) { return nil, nil }
 
 type rootNamespaceCreator struct{}
 
-func (r *rootNamespaceCreator) Configure(map[string]interface{}) error { return nil }
-func (r *rootNamespaceCreator) Namespace() Namespace                   { return nil }
+func (r *rootNamespaceCreator) Configure(any) error  { return nil }
+func (r *rootNamespaceCreator) Namespace() Namespace { return nil }
 
 //-------------------------------------------------------------------
 // Get
@@ -1448,12 +1448,12 @@ func TestImportGetImmutable(t *testing.T) {
 // rootEmbedNamespace embeds a Namespace for easy testing.
 type rootEmbedNamespace struct{ Namespace }
 
-func (r *rootEmbedNamespace) Configure(map[string]interface{}) error { return nil }
+func (r *rootEmbedNamespace) Configure(any) error { return nil }
 
 // rootEmbedCall embeds a Call for easy testing.
 type rootEmbedCall struct{ C Call }
 
-func (r *rootEmbedCall) Configure(map[string]interface{}) error { return nil }
+func (r *rootEmbedCall) Configure(any) error { return nil }
 
 func (r *rootEmbedCall) Get(k string) (interface{}, error) {
 	return r.C.Get(k)
@@ -1523,7 +1523,7 @@ type rootNew struct {
 	F func(map[string]interface{}) (Namespace, error)
 }
 
-func (r *rootNew) Configure(map[string]interface{}) error { return nil }
+func (r *rootNew) Configure(any) error { return nil }
 
 func (r *rootNew) Get(k string) (interface{}, error) {
 	return map[string]interface{}{"result": "New not called (Get)"}, nil
@@ -1697,8 +1697,8 @@ func TestImportGet_namespaceCreatorExpire(t *testing.T) {
 
 type rootCounter struct{}
 
-func (r *rootCounter) Configure(map[string]interface{}) error { return nil }
-func (r *rootCounter) Namespace() Namespace                   { return &nsCounter{} }
+func (r *rootCounter) Configure(any) error  { return nil }
+func (r *rootCounter) Namespace() Namespace { return &nsCounter{} }
 
 // nsCounter is a stateful Namespace that increments a counter every Get.
 type nsCounter struct {

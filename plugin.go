@@ -24,7 +24,7 @@ var (
 )
 
 //go:generate rm -f mock_Import.go mock_Import_Closer.go
-//go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Import
+//go:generate mockery --inpackage --name=Import
 //go:generate cp mock_Import_Closer.go.src mock_Import_Closer.go
 
 // Import is an importable package.
@@ -38,7 +38,7 @@ var (
 type Import interface {
 	// Configure is called to configure the plugin before it is accessed.
 	// This must be called before any call to Get().
-	Configure(map[string]interface{}) error
+	Configure(any) error
 
 	// Get is called when an import field is accessed or called as a function.
 	//

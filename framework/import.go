@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
 )
 
@@ -29,7 +29,7 @@ type Import struct {
 }
 
 // plugin.Import impl.
-func (m *Import) Configure(raw map[string]interface{}) error {
+func (m *Import) Configure(raw any) error {
 	// Verify the root implementation is a Namespace or NamespaceCreator.
 	switch m.Root.(type) {
 	case Namespace:

@@ -1,11 +1,9 @@
 package framework
 
 //go:generate rm -f mock_*.go
-//go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Root -testonly
-//go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Namespace -testonly
-
-// BUG: Due to https://github.com/vektra/mockery/issues/154 we can't auto-run.
-// BUG: go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=NamespaceCreator -testonly
+//go:generate mockery --inpackage --name=Root --testonly
+//go:generate mockery --inpackage --name=Namespace --testonly
+//go:generate mockery --inpackage --name=NamespaceCreator --testonly
 
 // Root is the import root. For any import, there is only a single root.
 // For example, if you're implementing an import named "time", then the "time"
@@ -20,7 +18,7 @@ package framework
 type Root interface {
 	// Configure is called to configure this import with the operator
 	// supplied configuration for this import.
-	Configure(map[string]interface{}) error
+	Configure(any) error
 
 	// Root must further implement one of two interfaces: NamespaceCreator
 	// or Namespace itself. See the documentation for each for when you'd
