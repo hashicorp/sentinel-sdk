@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
-	"github.com/hashicorp/sentinel-sdk/proto/go"
+	proto "github.com/hashicorp/sentinel-sdk/proto/go"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-// ImportGRPCClient is a gRPC server for Imports.
-type ImportGRPCClient struct {
-	Client proto.ImportClient
+// PluginGRPCClient is a gRPC server for Plugins.
+type PluginGRPCClient struct {
+	Client proto.PluginClient
 
 	instanceId uint64
 }
 
-func (m *ImportGRPCClient) Close() error {
+func (m *PluginGRPCClient) Close() error {
 	if m.instanceId > 0 {
 		_, err := m.Client.Close(context.Background(), &proto.Close_Request{
 			InstanceId: m.instanceId,
@@ -29,7 +29,7 @@ func (m *ImportGRPCClient) Close() error {
 	return nil
 }
 
-func (m *ImportGRPCClient) Configure(config map[string]interface{}) error {
+func (m *PluginGRPCClient) Configure(config map[string]interface{}) error {
 	v, err := encoding.GoToValue(config)
 	if err != nil {
 		return fmt.Errorf("config couldn't be encoded to plugin: %s", err)
@@ -46,7 +46,7 @@ func (m *ImportGRPCClient) Configure(config map[string]interface{}) error {
 	return nil
 }
 
-func (m *ImportGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
+func (m *PluginGRPCClient) Get(rawReqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 	reqs := make([]*proto.Get_Request, 0, len(rawReqs))
 	for _, req := range rawReqs {
 		// Request keys

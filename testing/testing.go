@@ -1,2 +1,2 @@
-// Package testing provides support for automated testing for import plugins.
+// Package testing provides support for automated testing for plugins.
 package testing

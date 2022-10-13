@@ -4,29 +4,29 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/stretchr/testify/mock"
 )
 
-func TestImport_gRPC_configure(t *testing.T) {
+func TestPlugin_gRPC_configure(t *testing.T) {
 	// Create a mock object
-	importMock := new(sdk.MockImport)
-	importMock.On("Configure",
+	pluginMock := new(sdk.MockPlugin)
+	pluginMock.On("Configure",
 		map[string]interface{}{"key": int64(42)}).
 		Return(nil)
 
-	obj, closer := testImportServeGRPC(t, importMock)
+	obj, closer := testPluginServeGRPC(t, pluginMock)
 	defer closer()
 
 	// Get
 	err := obj.Configure(map[string]interface{}{"key": 42})
-	importMock.AssertExpectations(t)
+	pluginMock.AssertExpectations(t)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
-func TestImport_gRPC_get(t *testing.T) {
+func TestPlugin_gRPC_get(t *testing.T) {
 	cases := []struct {
 		Name     string
 		Requests []*sdk.GetReq
@@ -35,7 +35,7 @@ func TestImport_gRPC_get(t *testing.T) {
 		{
 			Name: "basic",
 			Requests: []*sdk.GetReq{
-				&sdk.GetReq{
+				{
 					KeyId: 42,
 					Keys: []sdk.GetKey{
 						{
@@ -53,7 +53,7 @@ func TestImport_gRPC_get(t *testing.T) {
 				},
 			},
 			Results: []*sdk.GetResult{
-				&sdk.GetResult{
+				{
 					KeyId: 42,
 					Keys:  []string{"key"},
 					Value: "bar",
@@ -71,7 +71,7 @@ func TestImport_gRPC_get(t *testing.T) {
 		{
 			Name: "niladic",
 			Requests: []*sdk.GetReq{
-				&sdk.GetReq{
+				{
 					KeyId: 42,
 					Keys: []sdk.GetKey{
 						{
@@ -82,7 +82,7 @@ func TestImport_gRPC_get(t *testing.T) {
 				},
 			},
 			Results: []*sdk.GetResult{
-				&sdk.GetResult{
+				{
 					KeyId: 42,
 					Keys:  []string{"key"},
 					Value: "bar",
@@ -92,7 +92,7 @@ func TestImport_gRPC_get(t *testing.T) {
 		{
 			Name: "not a function",
 			Requests: []*sdk.GetReq{
-				&sdk.GetReq{
+				{
 					KeyId: 42,
 					Keys: []sdk.GetKey{
 						{
@@ -102,7 +102,7 @@ func TestImport_gRPC_get(t *testing.T) {
 				},
 			},
 			Results: []*sdk.GetResult{
-				&sdk.GetResult{
+				{
 					KeyId: 42,
 					Keys:  []string{"key"},
 					Value: "bar",
@@ -114,9 +114,9 @@ func TestImport_gRPC_get(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run(tc.Name, func(t *testing.T) {
-			importMock := new(sdk.MockImport)
-			importMock.On("Configure", map[string]interface{}{}).Return(nil)
-			importMock.On("Get",
+			pluginMock := new(sdk.MockPlugin)
+			pluginMock.On("Configure", map[string]interface{}{}).Return(nil)
+			pluginMock.On("Get",
 				mock.MatchedBy(func(reqs []*sdk.GetReq) bool {
 					if len(tc.Requests) != len(reqs) {
 						return false
@@ -129,7 +129,7 @@ func TestImport_gRPC_get(t *testing.T) {
 					return reflect.DeepEqual(tc.Requests, reqs)
 				})).Return(tc.Results, nil)
 
-			obj, closer := testImportServeGRPC(t, importMock)
+			obj, closer := testPluginServeGRPC(t, pluginMock)
 			defer closer()
 
 			// We need to configure first
@@ -139,7 +139,7 @@ func TestImport_gRPC_get(t *testing.T) {
 
 			// Get
 			results, err := obj.Get(tc.Requests)
-			importMock.AssertExpectations(t)
+			pluginMock.AssertExpectations(t)
 			if err != nil {
 				t.Fatalf("err: %s", err)
 			}

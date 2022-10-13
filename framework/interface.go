@@ -1,25 +1,23 @@
 package framework
 
 //go:generate rm -f mock_*.go
-//go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Root -testonly
-//go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Namespace -testonly
+//go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=Root --testonly
+//go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=Namespace --testonly
+// go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=NamespaceCreator --testonly
 
-// BUG: Due to https://github.com/vektra/mockery/issues/154 we can't auto-run.
-// BUG: go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=NamespaceCreator -testonly
-
-// Root is the import root. For any import, there is only a single root.
-// For example, if you're implementing an import named "time", then the "time"
-// identifier itself represents the import root.
+// Root is the plugin root. For any plugin, there is only a single root.
+// For example, if you're implementing a plugin named "time", then the "time"
+// identifier itself represents the plugin root.
 //
-// The root of an import is configurable and is able to return the actual
+// The root of an plugin is configurable and is able to return the actual
 // interfaces uses for value retrieval. The root itself can never contain
 // a value, be callable, return all mappings, etc.
 //
 // A single root implementation and instance may be shared by many policy
 // executions if their configurations match.
 type Root interface {
-	// Configure is called to configure this import with the operator
-	// supplied configuration for this import.
+	// Configure is called to configure this plugin with the operator
+	// supplied configuration for this plugin.
 	Configure(map[string]interface{}) error
 
 	// Root must further implement one of two interfaces: NamespaceCreator
@@ -32,12 +30,12 @@ type Root interface {
 // Root interface. It allows the Root implementation to create a unique
 // Namespace implementation for each policy execution.
 //
-// This is useful for imports that maintain state per policy execution.
+// This is useful for plugins that maintain state per policy execution.
 // For example for the "time" package, it may be useful for the state to
 // be the current time so that all access returns a singular view of time
 // for a policy execution.
 //
-// If your import doesn't require per-execution state, Root should
+// If your plugin doesn't require per-execution state, Root should
 // implement Namespace directly instead.
 type NamespaceCreator interface {
 	Root
@@ -59,7 +57,7 @@ type NamespaceCreator interface {
 // Root or NamespaceCreator.
 //
 // The format of the object and the kinds of namespaces returned by
-// the constructor are up to the import author.
+// the constructor are up to the plugin author.
 type New interface {
 	Namespace
 
@@ -67,7 +65,7 @@ type New interface {
 	// receiver data.
 	//
 	// The format of the object and the kinds of namespaces returned by
-	// the constructor are up to the import author.
+	// the constructor are up to the plugin author.
 	//
 	// Namespaces returned by this function must implement
 	// framework.Map, or else errors will be returned on
@@ -85,7 +83,7 @@ type New interface {
 // be a namespace.
 //
 // Namespaces are either represented or returned by the Root implementation.
-// Root is the top-level implementation for an import. See Import and Root
+// Root is the top-level implementation for a plugin. See Plugin and Root
 // for more details.
 //
 // A Namespace on its own doesn't allow accessing the full mapping of

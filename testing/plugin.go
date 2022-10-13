@@ -2,6 +2,7 @@ package testing
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,16 +19,17 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 )
 
-//go:generate go-bindata -nomemcopy -pkg=testing ./data/...
+//go:embed data
+var content embed.FS
 
-// importMap is the list of built import binaries keyed by import path.
-// This import path should be canonicalized via ImportPath.
-var importBuildDir string
-var importMap = map[string]string{}
-var importErr = map[string]error{}
+// pluginMap is the list of built plugin binaries keyed by plugin path.
+// This plugin path should be canonicalized via PluginPath.
+var pluginBuildDir string
+var pluginMap = map[string]string{}
+var pluginErr = map[string]error{}
 
-// TestImportCase is a single test case for configuring TestImport.
-type TestImportCase struct {
+// TestPluginCase is a single test case for configuring TestPlugin.
+type TestPluginCase struct {
 	// Source is a policy to execute. This should be a full program ending
 	// in `main = ` and an assignment. For example `main = subject.foo`.
 	Source string
@@ -41,27 +43,27 @@ type TestImportCase struct {
 	// execution
 	Global map[string]interface{}
 
-	// Mock is mocked import data
+	// Mock is mocked plugin data
 	Mock map[string]map[string]interface{}
 
-	// ImportPath is the path to a Go package on your GOPATH containing
-	// the import to test. If this is blank, the test case uses heuristics
+	// PluginPath is the path to a Go package on your GOPATH containing
+	// the plugin to test. If this is blank, the test case uses heuristics
 	// to extract the GOPATH and use the current package for testing.
 	// This package is expected to expose a "New" function which adheres to
-	// the sdk/rpc.ImportFunc signature.
+	// the sdk/rpc.PluginFunc signature.
 	//
 	// This should usually be blank. This maximizes portability of the
-	// import if it were to be forked or moved.
+	// plugin if it were to be forked or moved.
 	//
-	// For a given import path, the test binary will be built exactly once
+	// For a given plugin path, the test binary will be built exactly once
 	// per test run.
-	ImportPath string
+	PluginPath string
 
-	// ImportName allows passing a custom name for the import to be used in
-	// test cases. By default, the import is simply named "subject". The
-	// import name is what is used within this policy's source to access
-	// functionality provided by the import.
-	ImportName string
+	// PluginName allows passing a custom name for the plugin to be used in
+	// test cases. By default, the plugin is simply named "subject". The
+	// plugin name is what is used within this policy's source to access
+	// functionality provided by the plugin.
+	PluginName string
 
 	// A string containing any expected runtime error during evaluation. If
 	// this field is non-empty, a runtime error is expected to occur, and
@@ -77,15 +79,15 @@ type TestImportCase struct {
 	Error string
 }
 
-// LoadTestImportCase is used to load a TestImportCase from a Sentinel policy
+// LoadTestPluginCase is used to load a TestPluginCase from a Sentinel policy
 // file. Certain test case pragmas are supported in the top-most comment body.
 // The following is a completely valid example:
 //
-//     //config: {"option1": "value1"}
-//     //error: failed to do the thing
-//     main = rule { true }
+//	//config: {"option1": "value1"}
+//	//error: failed to do the thing
+//	main = rule { true }
 //
-// The above would load a TestImport case using the specified options. The
+// The above would load a TestPlugin case using the specified options. The
 // config is loaded as a JSON string and unmarshaled into the Config field.
 // The error field is loaded as a string into the Error field. Pragmas *must*
 // be at the very top of the file, starting at line one. When a non-pragma
@@ -94,7 +96,7 @@ type TestImportCase struct {
 // This makes boilerplate very simple for a large number of Sentinel tests,
 // and allows an entire test to be captured neatly into a single file which
 // also happens to be the policy being tested.
-func LoadTestImportCase(t testing.T, path string) TestImportCase {
+func LoadTestPluginCase(t testing.T, path string) TestPluginCase {
 	fh, err := os.Open(path)
 	if err != nil {
 		t.Fatalf("error opening policy: %v", err)
@@ -141,7 +143,7 @@ func LoadTestImportCase(t testing.T, path string) TestImportCase {
 		t.Fatal(err)
 	}
 
-	tc := TestImportCase{
+	tc := TestPluginCase{
 		Source: string(policyBytes),
 		Error:  errMatch,
 	}
@@ -156,16 +158,16 @@ func LoadTestImportCase(t testing.T, path string) TestImportCase {
 	return tc
 }
 
-// TestImportDir iterates over files in a directory, calls
-// LoadTestImportCase on each file suffixed with ".sentinel", and executes all
-// of the import tests.
-func TestImportDir(t testing.T, path string, customize func(*TestImportCase)) {
+// TestPluginDir iterates over files in a directory, calls
+// LoadTestPluginCase on each file suffixed with ".sentinel", and executes all
+// of the plugin tests.
+func TestPluginDir(t testing.T, path string, customize func(*TestPluginCase)) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cases := make(map[string]TestImportCase)
+	cases := make(map[string]TestPluginCase)
 	for _, fi := range files {
 		// Allow the directory to be structured.
 		if fi.IsDir() {
@@ -179,7 +181,7 @@ func TestImportDir(t testing.T, path string, customize func(*TestImportCase)) {
 
 		// Load the sentinel file and parse it.
 		fp := filepath.Join(path, fi.Name())
-		tc := LoadTestImportCase(t, fp)
+		tc := LoadTestPluginCase(t, fp)
 
 		// If a customization function was provided, execute it.
 		if customize != nil {
@@ -197,46 +199,46 @@ func TestImportDir(t testing.T, path string, customize func(*TestImportCase)) {
 		// to the error is obtuse otherwise, so we'll just log the policy file
 		// name here to give that context to the developer.
 		t.Logf("Checking %s ...", file)
-		TestImport(t, tc)
+		TestPlugin(t, tc)
 	}
 }
 
 // Clean cleans any temporary files created. This should always be called
-// at the end of any set of import tests.
+// at the end of any set of plugin tests.
 func Clean() {
 	// Delete our build directory
-	if importBuildDir != "" {
-		os.RemoveAll(importBuildDir)
+	if pluginBuildDir != "" {
+		os.RemoveAll(pluginBuildDir)
 	}
 
 	// Reset all globals
-	importMap = map[string]string{}
-	importErr = map[string]error{}
+	pluginMap = map[string]string{}
+	pluginErr = map[string]error{}
 }
 
-// TestImport tests that a sdk.Import implementation works as expected.
-func TestImport(t testing.T, c TestImportCase) {
+// TestPlugin tests that a sdk.Plugin implementation works as expected.
+func TestPlugin(t testing.T, c TestPluginCase) {
 	// Infer the path
-	path, err := ImportPath(c.ImportPath)
+	path, err := PluginPath(c.PluginPath)
 	if err != nil {
 		t.Fatalf("error inferring GOPATH: %s", err)
 	}
 
 	// If we already errored building this, report it
-	if err, ok := importErr[path]; ok {
-		t.Fatalf("error building import: %s", err)
+	if err, ok := pluginErr[path]; ok {
+		t.Fatalf("error building plugin: %s", err)
 	}
 
-	// Get the path to the built import, or build it
-	binaryPath, ok := importMap[path]
+	// Get the path to the built plugin, or build it
+	binaryPath, ok := pluginMap[path]
 	if !ok {
-		binaryPath = buildImport(t, path)
+		binaryPath = buildPlugin(t, path)
 	}
 
 	// Build the full source which requires importing the subject
 	src := `import "subject"`
-	if c.ImportName != "" {
-		src += " as " + c.ImportName
+	if c.PluginName != "" {
+		src += " as " + c.PluginName
 	}
 	src += "\n\n" + c.Source
 
@@ -302,11 +304,11 @@ func TestImport(t testing.T, c TestImportCase) {
 	}
 }
 
-// importPathModule determines the import path when modules are
+// pluginPathModule determines the plugin path when modules are
 // enabled, through the use of "go list".
 //
 // The working directory is set to dir, if supplied.
-func importPathModule(dir string) (string, error) {
+func pluginPathModule(dir string) (string, error) {
 	cmd := exec.Command("go", "list")
 	if dir != "" {
 		wd, err := filepath.Abs(dir)
@@ -344,11 +346,11 @@ func isUsingModules() bool {
 	return true
 }
 
-// ImportPath attempts to infer the import path based on the GOPATH
+// PluginPath attempts to infer the plugin path based on the GOPATH
 // environment variable and the directory.
-func ImportPath(dir string) (string, error) {
+func PluginPath(dir string) (string, error) {
 	if isUsingModules() {
-		return importPathModule(dir)
+		return pluginPathModule(dir)
 	}
 
 	gopath := os.Getenv("GOPATH")
@@ -379,18 +381,22 @@ func ImportPath(dir string) (string, error) {
 	return path, nil
 }
 
-// buildImport compiles the import binary with the given Go import path.
-// The path to the completed binary is inserted into the global importMap.
-func buildImport(t testing.T, path string) string {
+// buildPlugin compiles the plugin binary with the given Go import path.
+// The path to the completed binary is inserted into the global pluginMap.
+func buildPlugin(t testing.T, path string) string {
 	log.Printf("Building binary: %s", path)
 
+	tpl, err := content.ReadFile("data/main.go.tpl")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 	// Create the main.go
 	main := bytes.Replace(
-		MustAsset("data/main.go.tpl"),
+		tpl,
 		[]byte("PATH"), []byte(path), -1)
 
 	// If we don't have a build dir, make one
-	if importBuildDir == "" {
+	if pluginBuildDir == "" {
 		// Create the directory to compile this
 		wd, err := os.Getwd()
 		if err != nil {
@@ -401,11 +407,11 @@ func buildImport(t testing.T, path string) string {
 			t.Fatalf("err: %s", err)
 		}
 
-		importBuildDir = td
+		pluginBuildDir = td
 	}
 
-	// Create the build dir for this import
-	td, err := ioutil.TempDir(importBuildDir, "sentinel-sdk")
+	// Create the build dir for this plugin
+	td, err := ioutil.TempDir(pluginBuildDir, "sentinel-sdk")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -416,8 +422,8 @@ func buildImport(t testing.T, path string) string {
 	}
 
 	// Build.  Note that when running on Windows systems the
-	// import will need an .EXE extension
-	buildOutput := "import-test"
+	// plugin will need an .EXE extension
+	buildOutput := "plugin-test"
 	if isWindows() {
 		buildOutput += ".exe"
 	}
@@ -426,14 +432,14 @@ func buildImport(t testing.T, path string) string {
 	cmd.Dir = td
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		importErr[path] = err
+		pluginErr[path] = err
 		t.Fatalf("err building the test binary. output:\n\n%s", string(output))
 	}
 
 	// Record it
-	importMap[path] = filepath.Join(td, buildOutput)
-	log.Printf("Import binary built at: %s", importMap[path])
-	return importMap[path]
+	pluginMap[path] = filepath.Join(td, buildOutput)
+	log.Printf("Plugin binary built at: %s", pluginMap[path])
+	return pluginMap[path]
 }
 
 func isWindows() bool {

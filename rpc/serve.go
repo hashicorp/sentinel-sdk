@@ -6,13 +6,13 @@ import (
 	"google.golang.org/grpc"
 
 	goplugin "github.com/hashicorp/go-plugin"
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 )
 
 // The constants below are the names of the plugins that can be dispensed
 // from the plugin server.
 const (
-	ImportPluginName = "import"
+	PluginName = "import"
 )
 
 // Handshake is the HandshakeConfig used to configure clients and servers.
@@ -31,14 +31,14 @@ var Handshake = goplugin.HandshakeConfig{
 
 // PluginMap should be used by clients for the map of plugins.
 var PluginMap = map[string]goplugin.Plugin{
-	ImportPluginName: &ImportPlugin{},
+	PluginName: &Plugin{},
 }
 
-type ImportFunc func() sdk.Import
+type PluginFunc func() sdk.Plugin
 
 // ServeOpts are the configurations to serve a plugin.
 type ServeOpts struct {
-	ImportFunc ImportFunc
+	PluginFunc PluginFunc
 }
 
 // Serve serves a plugin. This function never returns and should be the final
@@ -59,6 +59,6 @@ func Serve(opts *ServeOpts) {
 // server or client.
 func pluginMap(opts *ServeOpts) map[string]goplugin.Plugin {
 	return map[string]goplugin.Plugin{
-		ImportPluginName: &ImportPlugin{F: opts.ImportFunc},
+		PluginName: &Plugin{F: opts.PluginFunc},
 	}
 }

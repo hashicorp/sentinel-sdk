@@ -14,16 +14,16 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func TestTestImport(t *testing.T) {
-	path, err := filepath.Abs("testimport")
+func TestTestPlugin(t *testing.T) {
+	path, err := filepath.Abs("testplugin")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	// Test good
 	t.Run("success", func(t *testing.T) {
-		TestImport(t, TestImportCase{
-			ImportPath: path,
+		TestPlugin(t, TestPluginCase{
+			PluginPath: path,
 			Source:     `main = subject.foo == "foo!!"`,
 		})
 	})
@@ -38,16 +38,16 @@ func TestTestImport(t *testing.T) {
 			}
 		}()
 
-		TestImport(&testingiface.RuntimeT{}, TestImportCase{
-			ImportPath: path,
+		TestPlugin(&testingiface.RuntimeT{}, TestPluginCase{
+			PluginPath: path,
 			Source:     `main = subject.foo == "foo!"`,
 		})
 	})
 
 	// Test runtime error
 	t.Run("error", func(t *testing.T) {
-		TestImport(&testingiface.RuntimeT{}, TestImportCase{
-			ImportPath: path,
+		TestPlugin(&testingiface.RuntimeT{}, TestPluginCase{
+			PluginPath: path,
 			Source:     `main = rule { error("nope") }`,
 			Error:      "nope",
 		})
@@ -55,8 +55,8 @@ func TestTestImport(t *testing.T) {
 
 	// Test runtime error w/ regular expression
 	t.Run("error with regex", func(t *testing.T) {
-		TestImport(&testingiface.RuntimeT{}, TestImportCase{
-			ImportPath: path,
+		TestPlugin(&testingiface.RuntimeT{}, TestPluginCase{
+			PluginPath: path,
 			Source:     `main = rule { error("super 1337 error") }`,
 			Error:      `/super \d+ error/`,
 		})
@@ -72,8 +72,8 @@ func TestTestImport(t *testing.T) {
 			}
 		}()
 
-		TestImport(&testingiface.RuntimeT{}, TestImportCase{
-			ImportPath: path,
+		TestPlugin(&testingiface.RuntimeT{}, TestPluginCase{
+			PluginPath: path,
 			Source:     `main = rule { error("super 1337 error") }`,
 			Error:      `/(super \d+ error/`,
 		})
@@ -81,8 +81,8 @@ func TestTestImport(t *testing.T) {
 
 	// Test configuration
 	t.Run("config", func(t *testing.T) {
-		TestImport(t, TestImportCase{
-			ImportPath: path,
+		TestPlugin(t, TestPluginCase{
+			PluginPath: path,
 			Config:     map[string]interface{}{"suffix": "??"},
 			Source:     `main = subject.foo == "foo??"`,
 		})
@@ -90,8 +90,8 @@ func TestTestImport(t *testing.T) {
 
 	// Test globals
 	t.Run("global", func(t *testing.T) {
-		TestImport(t, TestImportCase{
-			ImportPath: path,
+		TestPlugin(t, TestPluginCase{
+			PluginPath: path,
 			Global:     map[string]interface{}{"value": "foo??"},
 			Source:     `main = value == "foo??"`,
 		})
@@ -99,8 +99,8 @@ func TestTestImport(t *testing.T) {
 
 	// Test mocks
 	t.Run("mock", func(t *testing.T) {
-		TestImport(t, TestImportCase{
-			ImportPath: path,
+		TestPlugin(t, TestPluginCase{
+			PluginPath: path,
 			Mock: map[string]map[string]interface{}{
 				"data": map[string]interface{}{
 					"value": "foo??",
@@ -110,18 +110,18 @@ func TestTestImport(t *testing.T) {
 		})
 	})
 
-	t.Run("custom import name", func(t *testing.T) {
-		TestImport(t, TestImportCase{
-			ImportPath: path,
-			ImportName: "foo",
+	t.Run("custom plugin name", func(t *testing.T) {
+		TestPlugin(t, TestPluginCase{
+			PluginPath: path,
+			PluginName: "foo",
 			Source:     `main = foo.bar is "bar!!"`,
 		})
 	})
 
 	// TestDirectory helper
 	t.Run("directory", func(t *testing.T) {
-		TestImportDir(t, "testdata/import-test-dir", func(tc *TestImportCase) {
-			tc.ImportPath = path
+		TestPluginDir(t, "testdata/plugin-test-dir", func(tc *TestPluginCase) {
+			tc.PluginPath = path
 			tc.Global = map[string]interface{}{"exclamation": "!"}
 		})
 	})

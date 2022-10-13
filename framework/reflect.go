@@ -18,7 +18,7 @@ var (
 // Currently, this means flattening them all to maps. In the future, we intend
 // to support "thunks" to allow efficiently transferring this data without
 // having to flatten it all.
-func (m *Import) reflect(value interface{}) (interface{}, error) {
+func (m *Plugin) reflect(value interface{}) (interface{}, error) {
 	v, err := m.reflectValue(reflect.ValueOf(value))
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (m *Import) reflect(value interface{}) (interface{}, error) {
 	return v.Interface(), nil
 }
 
-func (m *Import) reflectValue(v reflect.Value) (reflect.Value, error) {
+func (m *Plugin) reflectValue(v reflect.Value) (reflect.Value, error) {
 	// If the value isn't valid, return right away
 	if !v.IsValid() {
 		return v, nil
@@ -76,7 +76,7 @@ func (m *Import) reflectValue(v reflect.Value) (reflect.Value, error) {
 	}
 }
 
-func (m *Import) reflectMap(mv reflect.Value) (reflect.Value, error) {
+func (m *Plugin) reflectMap(mv reflect.Value) (reflect.Value, error) {
 	// Create a new map for this. This avoids conflicts and panics on shared
 	// data, and ensures we aren't altering data in the original namespace.
 	// map[string]interface{} is always used, regardless of the actual type of
@@ -110,7 +110,7 @@ func (m *Import) reflectMap(mv reflect.Value) (reflect.Value, error) {
 	return result, nil
 }
 
-func (m *Import) reflectSlice(v reflect.Value) (reflect.Value, error) {
+func (m *Plugin) reflectSlice(v reflect.Value) (reflect.Value, error) {
 	// Create a new slice for this. This avoids conflicts and panics on
 	// shared data, and ensures that we aren't altering data in the
 	// original namespace. []interface{} is always used, regardless of

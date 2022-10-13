@@ -14,19 +14,19 @@ import (
 	sdk "github.com/hashicorp/sentinel-sdk"
 )
 
-func TestImport_impl(t *testing.T) {
-	var _ sdk.Import = new(Import)
+func TestPlugin_impl(t *testing.T) {
+	var _ sdk.Plugin = new(Plugin)
 }
 
 //-------------------------------------------------------------------
 // Configure
 
-func TestImportConfigure(t *testing.T) {
+func TestPluginConfigure(t *testing.T) {
 	mockRoot := new(MockNamespaceCreator)
 	mockRoot.On("Configure",
 		map[string]interface{}{"key": 42}).Return(nil)
 
-	impt := &Import{Root: mockRoot}
+	impt := &Plugin{Root: mockRoot}
 	err := impt.Configure(map[string]interface{}{"key": 42})
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -35,7 +35,7 @@ func TestImportConfigure(t *testing.T) {
 	mockRoot.AssertExpectations(t)
 }
 
-func TestImportConfigure_noNamespace(t *testing.T) {
+func TestPluginConfigure_noNamespace(t *testing.T) {
 	cases := []struct {
 		Name string
 		Root Root
@@ -62,7 +62,7 @@ func TestImportConfigure_noNamespace(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.Name, func(t *testing.T) {
-			impt := &Import{Root: tc.Root}
+			impt := &Plugin{Root: tc.Root}
 			err := impt.Configure(map[string]interface{}{})
 			if (err != nil) != tc.Err {
 				t.Fatalf("err: %s", err)
@@ -1229,7 +1229,7 @@ var getCases = []struct {
 			},
 		},
 		nil,
-		"sdk.GetReq.Context present but import does not support framework.New",
+		"sdk.GetReq.Context present but plugin does not support framework.New",
 	},
 
 	{
@@ -1301,10 +1301,10 @@ var getCases = []struct {
 	},
 }
 
-func TestImportGet(t *testing.T) {
+func TestPluginGet(t *testing.T) {
 	for _, tc := range getCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			impt := &Import{
+			impt := &Plugin{
 				Root: tc.Root,
 			}
 
@@ -1334,10 +1334,10 @@ func TestImportGet(t *testing.T) {
 	}
 }
 
-func TestImportGetConcurrent(t *testing.T) {
+func TestPluginGetConcurrent(t *testing.T) {
 	for _, tc := range getCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			impt := &Import{
+			impt := &Plugin{
 				Root: tc.Root,
 			}
 
@@ -1390,12 +1390,12 @@ func TestImportGetConcurrent(t *testing.T) {
 	}
 }
 
-// TestImportGetImmutable checks to ensure that any deep response
+// TestPluginGetImmutable checks to ensure that any deep response
 // reflection we do does not alter the structure of the original
-// underlying import data.
-func TestImportGetImmutable(t *testing.T) {
-	imptF := func() *Import {
-		return &Import{
+// underlying plugin data.
+func TestPluginGetImmutable(t *testing.T) {
+	imptF := func() *Plugin {
+		return &Plugin{
 			Root: &rootEmbedNamespace{&nsKeyValue{
 				Key: "foo",
 				Value: &nsKeyValueMap{
@@ -1441,7 +1441,7 @@ func TestImportGetImmutable(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(expected, actual) {
-		t.Fatal("import data should not have been altered")
+		t.Fatal("plugin data should not have been altered")
 	}
 }
 
@@ -1579,8 +1579,8 @@ func (v *nsNilable) Map() (map[string]interface{}, error) {
 }
 
 // Test Get with a Root that implements NamespaceCreator.
-func TestImportGet_namespaceCreator(t *testing.T) {
-	impt := &Import{
+func TestPluginGet_namespaceCreator(t *testing.T) {
+	impt := &Plugin{
 		Root: &rootCounter{},
 	}
 
@@ -1638,8 +1638,8 @@ func TestImportGet_namespaceCreator(t *testing.T) {
 
 // Test Get with a Root that implements NamespaceCreator expires the
 // created namespaces properly.
-func TestImportGet_namespaceCreatorExpire(t *testing.T) {
-	impt := &Import{
+func TestPluginGet_namespaceCreatorExpire(t *testing.T) {
+	impt := &Plugin{
 		Root: &rootCounter{},
 	}
 

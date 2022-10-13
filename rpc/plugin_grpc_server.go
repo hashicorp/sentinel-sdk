@@ -8,32 +8,32 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
-	"github.com/hashicorp/sentinel-sdk/proto/go"
+	proto "github.com/hashicorp/sentinel-sdk/proto/go"
 	"golang.org/x/net/context"
 )
 
-// ImportGRPCServer is a gRPC server for Imports.
-type ImportGRPCServer struct {
-	F func() sdk.Import
+// PluginGRPCServer is a gRPC server for Plugins.
+type PluginGRPCServer struct {
+	F func() sdk.Plugin
 
 	// instanceId is the current instance ID. This should be modified
 	// with sync/atomic.
 	instanceId    uint64
-	instances     map[uint64]sdk.Import
+	instances     map[uint64]sdk.Plugin
 	instancesLock sync.RWMutex
 }
 
-func (m *ImportGRPCServer) Close(
+func (m *PluginGRPCServer) Close(
 	ctx context.Context, v *proto.Close_Request) (*proto.Empty, error) {
-	// Get the import and remove it immediately
+	// Get the plugin and remove it immediately
 	m.instancesLock.Lock()
 	impt, ok := m.instances[v.InstanceId]
 	delete(m.instances, v.InstanceId)
 	m.instancesLock.Unlock()
 
-	// If we have it, attempt to call Close on the import if it is
+	// If we have it, attempt to call Close on the plugin if it is
 	// a closer.
 	if ok {
 		if c, ok := impt.(io.Closer); ok {
@@ -44,7 +44,7 @@ func (m *ImportGRPCServer) Close(
 	return &proto.Empty{}, nil
 }
 
-func (m *ImportGRPCServer) Configure(
+func (m *PluginGRPCServer) Configure(
 	ctx context.Context, v *proto.Configure_Request) (*proto.Configure_Response, error) {
 	// Build the configuration
 	var config map[string]interface{}
@@ -54,7 +54,7 @@ func (m *ImportGRPCServer) Configure(
 	}
 	config = configRaw.(map[string]interface{})
 
-	// Configure is called once to configure a new import. Allocate the import.
+	// Configure is called once to configure a new plugin. Allocate the plugin.
 	impt := m.F()
 
 	// Call configure
@@ -65,21 +65,21 @@ func (m *ImportGRPCServer) Configure(
 	// We have to allocate a new instance ID.
 	id := atomic.AddUint64(&m.instanceId, 1)
 
-	// Put the import into the store
+	// Put the plugin into the store
 	m.instancesLock.Lock()
 	if m.instances == nil {
-		m.instances = make(map[uint64]sdk.Import)
+		m.instances = make(map[uint64]sdk.Plugin)
 	}
 	m.instances[id] = impt
 	m.instancesLock.Unlock()
 
-	// Configure the import
+	// Configure the plugin
 	return &proto.Configure_Response{
 		InstanceId: id,
 	}, nil
 }
 
-func (m *ImportGRPCServer) Get(
+func (m *PluginGRPCServer) Get(
 	ctx context.Context, v *proto.Get_MultiRequest) (*proto.Get_MultiResponse, error) {
 	// Build the mapping of requests by instance ID. Then we can make the
 	// calls for each proper instance easily.

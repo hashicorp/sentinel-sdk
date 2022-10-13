@@ -1,6 +1,6 @@
 GOTOOLS = \
 	github.com/golang/protobuf/protoc-gen-go@latest \
-	github.com/vektra/mockery/cmd/mockery@latest \
+	github.com/vektra/mockery/v2@latest \
 	gotest.tools/gotestsum@latest
 
 SENTINEL_VERSION = 0.18.0
