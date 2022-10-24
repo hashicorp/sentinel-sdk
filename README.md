@@ -30,8 +30,8 @@ of Sentinel.
 
 Sentinel Version|Plugin Protocol Version|SDK Version
 -|-|-
-**Current (Up to v0.10.4)**|**1**|**Up to v0.1.1**
-Planned for v0.11.0|2|Since v0.2.0
+**Up to v0.10.4**|**1**|**Up to v0.1.1**
+Up to v0.18.12|2|Since v0.2.0
 
 ## Development Info
 
