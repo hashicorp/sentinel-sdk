@@ -1,23 +1,23 @@
-# Sentinel Import SDK
+# Sentinel Plugin SDK
 
 ![Tests](https://github.com/hashicorp/sentinel-sdk/actions/workflows/test.yml/badge.svg)
 [![GoDoc](https://godoc.org/github.com/hashicorp/sentinel-sdk?status.svg)](https://godoc.org/github.com/hashicorp/sentinel-sdk)
 
 This repository contains the [Sentinel](https://www.hashicorp.com/sentinel)
-import SDK. This SDK allows developers to extend Sentinel to source external
+plugin SDK. This SDK allows developers to extend Sentinel to source external
 information for use in their policies.
 
-Sentinel imports can be written in any language, but the recommended language is
+Sentinel plugins can be written in any language, but the recommended language is
 [Go](https://golang.org/). We provide a high-level framework to make writing
-imports in Go extremely easy. For other languages, imports can be written by
+plugins in Go extremely easy. For other languages, plugins can be written by
 implementing the
-[protocol](https://github.com/hashicorp/sentinel-sdk/blob/main/proto/import.proto)
+[protocol](https://github.com/hashicorp/sentinel-sdk/blob/main/proto/plugin.proto)
 over gRPC.
 
-To get started writing a Sentinel import, we recommend reading the [extending
+To get started writing a Sentinel plugin, we recommend reading the [extending
 Sentinel](https://docs.hashicorp.com/sentinel/extending/) guide.
 
-You can also view the import API via
+You can also view the plugin API via
 [GoDoc](https://godoc.org/github.com/hashicorp/sentinel-sdk).
 
 ## SDK Compatibility Matrix
@@ -30,8 +30,8 @@ of Sentinel.
 
 Sentinel Version|Plugin Protocol Version|SDK Version
 -|-|-
-**Current (Up to v0.10.4)**|**1**|**Up to v0.1.1**
-Planned for v0.11.0|2|Since v0.2.0
+**Up to v0.10.4**|**1**|**Up to v0.1.1**
+Up to v0.18.12|2|Since v0.2.0
 
 ## Development Info
 

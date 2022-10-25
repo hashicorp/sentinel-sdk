@@ -1,13 +1,13 @@
 syntax = "proto3";
 package hashicorp.sentinel.proto;
-option go_package = "proto";
+option go_package = "./;proto";
 
 //-------------------------------------------------------------------
-// Import Service
+// Plugin Service
 
-// Import is the RPC service that must be implemented by a valid import
-// for Sentinel. Sentinel can then consume this import.
-service Import {
+// Plugin is the RPC service that must be implemented by a valid plugin
+// for Sentinel. Sentinel can then consume this plugin.
+service Plugin {
     rpc Configure(Configure.Request) returns (Configure.Response);
     rpc Get(Get.MultiRequest) returns (Get.MultiResponse);
     rpc Close(Close.Request) returns (Empty);
@@ -16,7 +16,7 @@ service Import {
 // Empty is just an empty message.
 message Empty {}
 
-// Configure are the structures for Import.Configure
+// Configure are the structures for Plugin.Configure
 message Configure {
     message Request {
         Value config = 3;
@@ -27,7 +27,7 @@ message Configure {
     }
 }
 
-// Get are the structures for an Import.Get.
+// Get are the structures for a Plugin.Get.
 message Get {
     // Request is a single request for a Get.
     message Request {
@@ -120,4 +120,3 @@ message Value {
         Map value_map = 7;
     }
 }
-

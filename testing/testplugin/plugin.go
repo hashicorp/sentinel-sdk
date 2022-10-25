@@ -1,15 +1,15 @@
-// Package testimport contains a test import that the testing package uses
-// for unit tests. This import should not be actually used for anything.
-package testimport
+// Package testplugin contains a test plugin that the testing package uses
+// for unit tests. This plugin should not be actually used for anything.
+package testplugin
 
 import (
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/framework"
 )
 
-// New creates a new Import.
-func New() sdk.Import {
-	return &framework.Import{
+// New creates a new Plugin.
+func New() sdk.Plugin {
+	return &framework.Plugin{
 		Root: &root{},
 	}
 }

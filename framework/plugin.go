@@ -8,18 +8,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/sentinel-sdk"
+	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
 )
 
 var stringTyp = reflect.TypeOf("")
 
-// Import implements sdk.Import. Configure and return this structure
-// to simplify implementation of sdk.Import.
-type Import struct {
-	// Root is the implementation of the import that the user of the
+// Plugin implements sdk.Plugin. Configure and return this structure
+// to simplify implementation of sdk.Plugin.
+type Plugin struct {
+	// Root is the implementation of the plugin that the user of the
 	// framework should implement. It represents the minimum necessary
-	// implementation for an import. See the docs for Root for more details.
+	// implementation for a plugin. See the docs for Root for more details.
 	Root Root
 
 	// namespaceMap keeps track of all the Namespaces for the various
@@ -28,23 +28,23 @@ type Import struct {
 	namespaceLock sync.RWMutex
 }
 
-// plugin.Import impl.
-func (m *Import) Configure(raw map[string]interface{}) error {
+// plugin.Plugin impl.
+func (m *Plugin) Configure(raw map[string]interface{}) error {
 	// Verify the root implementation is a Namespace or NamespaceCreator.
 	switch m.Root.(type) {
 	case Namespace:
 	case NamespaceCreator:
 	default:
-		return fmt.Errorf("invalid import implementation, please report a " +
-			"bug to the developer of this import")
+		return fmt.Errorf("invalid plugin implementation, please report a " +
+			"bug to the developer of this plugin")
 	}
 
 	// Configure the object itself
 	return m.Root.Configure(raw)
 }
 
-// plugin.Import impl.
-func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
+// plugin.Plugin impl.
+func (m *Plugin) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 	resp := make([]*sdk.GetResult, len(reqs))
 	for i, req := range reqs {
 		// Get the namespace
@@ -87,10 +87,10 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 			} else {
 				// Invalid implementation. This should not happen and is
 				// indicative of something more than likely wrong with the
-				// runtime. Nonetheless, this is not the import's problem
+				// runtime. Nonetheless, this is not the plugin's problem
 				// as the malformed data did not come from it.
 				return nil, errors.New(
-					"sdk.GetReq.Context present but import does not support framework.New")
+					"sdk.GetReq.Context present but plugin does not support framework.New")
 			}
 		}
 
@@ -131,7 +131,7 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 			// For maps with string keys, get the value. If the value is
 			// nil, return sdk.Null to ensure that we don't mess with how
 			// reflection deals with "invalid" zero values in maps. See
-			// Import.reflectMap for more details.
+			// Plugin.reflectMap for more details.
 			case map[string]interface{}:
 				var ok bool
 				if result, ok = x[k.Key]; ok {
@@ -224,7 +224,7 @@ func (m *Import) Get(reqs []*sdk.GetReq) ([]*sdk.GetResult, error) {
 	return resp, nil
 }
 
-func (m *Import) resultReflect(result interface{}) (interface{}, error) {
+func (m *Plugin) resultReflect(result interface{}) (interface{}, error) {
 	// If we have a Map implementation, we return the whole thing.
 	if m, ok := result.(Map); ok {
 		var err error
@@ -246,7 +246,7 @@ func (m *Import) resultReflect(result interface{}) (interface{}, error) {
 }
 
 // namespace returns the namespace for the request.
-func (m *Import) namespace(req *sdk.GetReq) Namespace {
+func (m *Plugin) namespace(req *sdk.GetReq) Namespace {
 	if global, ok := m.Root.(Namespace); ok {
 		return global
 	}
@@ -291,14 +291,14 @@ func (m *Import) namespace(req *sdk.GetReq) Namespace {
 	return ns
 }
 
-func (m *Import) invalidateNamespace(id uint64) {
+func (m *Plugin) invalidateNamespace(id uint64) {
 	m.namespaceLock.Lock()
 	defer m.namespaceLock.Unlock()
 	delete(m.namespaceMap, id)
 }
 
 // call performs the typed function call via reflection for f.
-func (m *Import) call(f interface{}, args []interface{}) (interface{}, error) {
+func (m *Plugin) call(f interface{}, args []interface{}) (interface{}, error) {
 	// If a function call isn't supported for this key, then it is an error
 	if f == nil {
 		return nil, fmt.Errorf("function call unsupported")
@@ -308,7 +308,7 @@ func (m *Import) call(f interface{}, args []interface{}) (interface{}, error) {
 	funcVal := reflect.ValueOf(f)
 	if funcVal.Kind() != reflect.Func {
 		return nil, fmt.Errorf(
-			"internal error: import didn't return function for key")
+			"internal error: plugin didn't return function for key")
 	}
 	funcType := funcVal.Type()
 

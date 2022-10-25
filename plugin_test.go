@@ -23,7 +23,7 @@ func TestGetResultListKeyId(t *testing.T) {
 		},
 	}
 	results := GetResultList([]*GetResult{
-		&GetResult{
+		{
 			KeyId: 42,
 		},
 	})

@@ -1,30 +1,30 @@
 // Package framework contains a high-level framework for implementing
-// Sentinel imports with Go.
+// Sentinel plugins with Go.
 //
-// The direct sdk.Import interface is a low-level interface that is
+// The direct sdk.Plugin interface is a low-level interface that is
 // tediuos, clunky, and difficult to implement correctly. The
-// interface is this way to assist in the performance of imports
+// interface is this way to assist in the performance of plugins
 // while executing Sentinel policies. This package provides a
-// high-level API that eases import implementation while still
+// high-level API that eases plugin implementation while still
 // supporting the performance-sensitive interface underneath.
 //
-// Imports are generally activated in this framework by serving the
-// plugin with the root namespace embedded in Import:
+// Plugins are generally activated in this framework by serving the
+// plugin with the root namespace embedded in Plugin:
 //
-//     package main
+//	package main
 //
-//     import (
-//         "github.com/hashicorp/sentinel-sdk"
-//         "github.com/hashicorp/sentinel-sdk/rpc"
-//     )
+//	import (
+//	    "github.com/hashicorp/sentinel-sdk"
+//	    "github.com/hashicorp/sentinel-sdk/rpc"
+//	)
 //
-//     func main() {
-//         rpc.Serve(&rpc.ServeOpts{
-//             ImportFunc: func() sdk.Import {
-//                 return &framework.Import{Root: &root{}}
-//             },
-//         })
-//     }
+//	func main() {
+//	    rpc.Serve(&rpc.ServeOpts{
+//	        PluginFunc: func() sdk.Plugin {
+//	            return &framework.Plugin{Root: &root{}}
+//	        },
+//	    })
+//	}
 //
 // The plugin framework is based around the concept of namespaces.
 // Root is the entrypoint namespace and must be implemented as a
@@ -37,7 +37,7 @@
 // calls or selective memoization calls, respectively.
 //
 // Root namespaces are generally global, that is, for the lifetime of
-// the execution of Sentinel, one single import Root namespace state
+// the execution of Sentinel, one single plugin Root namespace state
 // will be shared by all policies that need to be executed. Take care
 // when storing state in the Root namespace. If you require state
 // in the Root namespace that must be unique across policy
@@ -49,7 +49,7 @@
 // arbitrary object data. New is ignored for namespaces past the
 // root.
 //
-// Non-primitive import return data is normally memoized, including
+// Non-primitive plugin return data is normally memoized, including
 // for namespaces. This prevents expensive calls over the plugin RPC.
 // Memoization can be controlled by a couple of methods:
 //
@@ -57,7 +57,7 @@
 // a map of values, sidestepping struct memoization. Normally, this
 // is combined with the MapFromKeys function which will call Get for
 // each defined key and add the return values to the map. Note that
-// multi-key import calls always bypass memoization - so if foo.bar
+// multi-key plugin calls always bypass memoization - so if foo.bar
 // is a namespace that implements Map but foo.bar.baz is looked up in
 // a single expression, it does not matter if baz is excluded from
 // Map.

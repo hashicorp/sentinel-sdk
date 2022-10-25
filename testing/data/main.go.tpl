@@ -1,5 +1,5 @@
 // This is a template used to generate the main file for the test binaries
-// built by the "testing" package for Sentinel imports. This isn't expected
+// built by the "testing" package for Sentinel plugins. This isn't expected
 // to be modified manually.
 
 package main
@@ -12,6 +12,6 @@ import (
 
 func main() {
 	rpc.Serve(&rpc.ServeOpts{
-		ImportFunc: impl.New,
+		PluginFunc: impl.New,
 	})
 }

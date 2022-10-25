@@ -2,7 +2,7 @@
 // plugins. A Sentinel plugin can provide data dynamically to Sentinel policies.
 //
 // For plugin authors, the subfolder "framework" contains a high-level
-// framework for easily implementing imports in Go.
+// framework for easily implementing plugins in Go.
 package sdk
 
 import (
@@ -23,24 +23,24 @@ var (
 	Null = &null{}
 )
 
-//go:generate rm -f mock_Import.go mock_Import_Closer.go
-//go:generate mockery -inpkg -note "Generated code. DO NOT MODIFY." -name=Import
-//go:generate cp mock_Import_Closer.go.src mock_Import_Closer.go
+//go:generate rm -f mock_Plugin.go mock_Plugin_Closer.go
+//go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=Plugin
+//go:generate cp mock_Plugin_Closer.go.src mock_Plugin_Closer.go
 
-// Import is an importable package.
+// Plugin is an importable package.
 //
-// Imports are a namespace that may contain objects and functions. The
+// Plugins are a namespace that may contain objects and functions. The
 // root level has no value nor can it be called. For example `import "a'`
 // allows access to fields within "a" such as `a.b` but doesn't allow
 // referencing or calling it directly with `a` alone. This is an important
-// difference between imports and external objects (which themselves express
+// difference between plugins and external objects (which themselves express
 // a value).
-type Import interface {
+type Plugin interface {
 	// Configure is called to configure the plugin before it is accessed.
 	// This must be called before any call to Get().
 	Configure(map[string]interface{}) error
 
-	// Get is called when an import field is accessed or called as a function.
+	// Get is called when an plugin field is accessed or called as a function.
 	//
 	// Get may request more than one value at a time, represented by multiple
 	// GetReq values. The result GetResult should contain the matching
@@ -52,7 +52,7 @@ type Import interface {
 	Get(reqs []*GetReq) ([]*GetResult, error)
 }
 
-// GetReq are the arguments given to Get for an Import.
+// GetReq are the arguments given to Get for an Plugin.
 type GetReq struct {
 	// ExecId is a unique ID representing the particular execution for this
 	// request. This can be used to maintain state locally.
@@ -66,7 +66,7 @@ type GetReq struct {
 	ExecDeadline time.Time
 
 	// Keys is the list of keys being requested. For example for "a.b.c"
-	// where "a" is the import, Keys would be ["b", "c"].
+	// where "a" is the plugin, Keys would be ["b", "c"].
 	Keys []GetKey
 
 	// KeyId is a unique ID for this key. This should match exactly the
@@ -74,18 +74,18 @@ type GetReq struct {
 	KeyId uint64
 
 	// Context, if supplied, is an arbitrary object intended to
-	// represent the data from an existing namespace. If the import
+	// represent the data from an existing namespace. If the plugin
 	// supports the framework.New interface, the contents are passed to
 	// it, with any resulting namespace being what Get operates on.
 	//
-	// The Get call operates on the root of the import if this is set
-	// to nil. If this is set and the import does not implement
+	// The Get call operates on the root of the plugin if this is set
+	// to nil. If this is set and the plugin does not implement
 	// framework.New, an error is returned.
 	Context map[string]interface{}
 }
 
 // GetKey is an individual key in the larger possible selector of the
-// specific import call, along with any supplied arguments for the
+// specific plugin call, along with any supplied arguments for the
 // specific key.
 type GetKey struct {
 	// The key for this part of the request.
