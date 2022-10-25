@@ -27,7 +27,7 @@ message Configure {
     }
 }
 
-// Get are the structures for an Plugin.Get.
+// Get are the structures for a Plugin.Get.
 message Get {
     // Request is a single request for a Get.
     message Request {

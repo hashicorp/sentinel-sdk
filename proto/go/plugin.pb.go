@@ -172,7 +172,7 @@ func (*Configure) Descriptor() ([]byte, []int) {
 	return file_plugin_proto_rawDescGZIP(), []int{1}
 }
 
-// Get are the structures for an Plugin.Get.
+// Get are the structures for a Plugin.Get.
 type Get struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

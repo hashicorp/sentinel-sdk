@@ -3,13 +3,13 @@ package framework
 //go:generate rm -f mock_*.go
 //go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=Root --testonly
 //go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=Namespace --testonly
-// go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=NamespaceCreator --testonly
+//go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=NamespaceCreator --testonly
 
 // Root is the plugin root. For any plugin, there is only a single root.
 // For example, if you're implementing a plugin named "time", then the "time"
 // identifier itself represents the plugin root.
 //
-// The root of an plugin is configurable and is able to return the actual
+// The root of a plugin is configurable and is able to return the actual
 // interfaces uses for value retrieval. The root itself can never contain
 // a value, be callable, return all mappings, etc.
 //
