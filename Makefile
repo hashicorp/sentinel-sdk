@@ -3,7 +3,7 @@ GOTOOLS = \
 	github.com/vektra/mockery/v2@latest \
 	gotest.tools/gotestsum@latest
 
-SENTINEL_VERSION = 0.19.0-alpha1
+SENTINEL_VERSION = 0.19.0
 SENTINEL_BIN_PATH := $(shell go env GOPATH)/bin
 
 test: tools
