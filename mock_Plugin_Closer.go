@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Do not edit mock_Plugin_Closer.go directly as your changes will be
 // overwritten. Instead, edit mock_Plugin_Closer.go.src and re-run
 // "go generate ./" in the root SDK package.

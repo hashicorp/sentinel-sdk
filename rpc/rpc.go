@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Package rpc contains the API that can be used to serve Sentinel
 // plugins over an RPC interface. Sentinel supports consuming plugins
 // across RPC with the requirement that the RPC must happen over a completely
