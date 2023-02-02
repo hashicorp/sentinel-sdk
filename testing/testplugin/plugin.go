@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Package testplugin contains a test plugin that the testing package uses
 // for unit tests. This plugin should not be actually used for anything.
 package testplugin

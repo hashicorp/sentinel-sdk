@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Package sdk contains the low-level interfaces and API for creating Sentinel
 // plugins. A Sentinel plugin can provide data dynamically to Sentinel policies.
 //

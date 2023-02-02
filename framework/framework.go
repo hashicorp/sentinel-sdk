@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Package framework contains a high-level framework for implementing
 // Sentinel plugins with Go.
 //
