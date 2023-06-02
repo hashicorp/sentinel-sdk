@@ -1,0 +1,10 @@
+schema: 1.1
+
+partition: tfc
+category: library
+
+summary:
+  owner: team-tf-compliance
+  description:
+    This repository contains the Sentinel plugin SDK. This SDK allows developers
+    to extend Sentinel to source external information for use in their policies.
