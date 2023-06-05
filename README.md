@@ -2,6 +2,7 @@
 
 ![Tests](https://github.com/hashicorp/sentinel-sdk/actions/workflows/test.yml/badge.svg)
 [![GoDoc](https://godoc.org/github.com/hashicorp/sentinel-sdk?status.svg)](https://godoc.org/github.com/hashicorp/sentinel-sdk)
+[![Heimdall](https://heimdall.hashicorp.services/api/v1/assets/sentinel-sdk/badge.svg?key=8a99f5a22605231081b7fb8be0453015916fb79441a73af371dc625373e4a919)](https://heimdall.hashicorp.services/site/assets/sentinel-sdk)
 
 This repository contains the [Sentinel](https://www.hashicorp.com/sentinel)
 plugin SDK. This SDK allows developers to extend Sentinel to source external
