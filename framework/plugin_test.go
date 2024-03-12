@@ -350,6 +350,32 @@ var getCases = []struct {
 	},
 
 	{
+		"key get nested list",
+		&rootEmbedNamespace{&nsKeyValue{
+			Key: "foo",
+			Value: &nsList{
+				Value: []interface{}{"bar", "baz"},
+			},
+		}},
+		[]*sdk.GetReq{
+			{
+				Keys: []sdk.GetKey{
+					{Key: "foo"},
+				},
+				KeyId: 42,
+			},
+		},
+		[]*sdk.GetResult{
+			{
+				Keys:  []string{"foo"},
+				KeyId: 42,
+				Value: []interface{}{"bar", "baz"},
+			},
+		},
+		"",
+	},
+
+	{
 		"key get map value",
 		&rootEmbedNamespace{&nsKeyValue{
 			Key: "foo",
@@ -1494,6 +1520,18 @@ func (v *nsKeyValueMap) Get(key string) (interface{}, error) {
 }
 
 func (v *nsKeyValueMap) Map() (map[string]interface{}, error) {
+	return v.Value, nil
+}
+
+// nsList implements Namespace and returns a value by looking up
+// the index in a slice
+type nsList struct{ Value []interface{} }
+
+func (v *nsList) Get(key string) (interface{}, error) {
+	return nil, nil
+}
+
+func (v *nsList) List() ([]interface{}, error) {
 	return v.Value, nil
 }
 

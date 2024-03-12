@@ -10,6 +10,7 @@ import (
 // various convenience types for reflect calls
 var (
 	mapTyp            = reflect.TypeOf((*Map)(nil)).Elem()
+	listTyp           = reflect.TypeOf((*List)(nil)).Elem()
 	interfaceTyp      = reflect.TypeOf((*interface{})(nil)).Elem()
 	sliceInterfaceTyp = reflect.TypeOf([]interface{}{})
 )
@@ -65,6 +66,15 @@ func (m *Plugin) reflectValue(v reflect.Value) (reflect.Value, error) {
 		}
 
 		v = reflect.ValueOf(m)
+	}
+
+	if v.Type().Implements(listTyp) {
+		l, err := v.Interface().(List).List()
+		if err != nil {
+			return v, err
+		}
+
+		v = reflect.ValueOf(l)
 	}
 
 	switch v.Kind() {
@@ -130,6 +140,7 @@ func (m *Plugin) reflectSlice(v reflect.Value) (reflect.Value, error) {
 	result := reflect.MakeSlice(sliceInterfaceTyp, v.Len(), v.Cap())
 	for i := 0; i < v.Len(); i++ {
 		elem := v.Index(i)
+
 		newElem, err := m.reflectValue(elem)
 		if err != nil {
 			return v, err

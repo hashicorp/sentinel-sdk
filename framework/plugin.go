@@ -237,6 +237,14 @@ func (m *Plugin) resultReflect(result interface{}) (interface{}, error) {
 		}
 	}
 
+	if l, ok := result.(List); ok {
+		var err error
+		result, err = l.List()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// We now need to do a bit of reflection to convert any dangling
 	// namespace values into values that can be returned across the
 	// plugin interface.

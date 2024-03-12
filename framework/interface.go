@@ -121,6 +121,13 @@ type Map interface {
 	Map() (map[string]interface{}, error)
 }
 
+// List is a Namespace that supports returning a list of data.
+type List interface {
+	Namespace
+
+	List() ([]interface{}, error)
+}
+
 // Call is a Namespace that supports call expressions. For example, "time.now()"
 // would invoke the Func function for "now".
 type Call interface {
