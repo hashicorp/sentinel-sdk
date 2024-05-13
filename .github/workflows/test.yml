@@ -36,9 +36,8 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
 
       - name: Install sentinel
-        uses: bloominlabs/setup-hashicorp-releases@24ba535809adca0a710fd39db83eef75cc90af0e # v2.0.0
+        uses: hashicorp/setup-sentinel@a25ee454cc706381e2bcab87fd2cb354c2736953 # v0.0.1
         with:
-          package: sentinel
           version: ${{ env.SENTINEL_VERSION }}
 
       - name: Test
