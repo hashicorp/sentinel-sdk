@@ -11,7 +11,8 @@
             {
                 devShell = pkgs.mkShell {
                     packages = [
-                        pkgs.go_1_21
+                        pkgs.go_1_22
+                        pkgs.delve
                     ];
                 };
             });
