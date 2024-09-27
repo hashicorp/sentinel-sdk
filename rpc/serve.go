@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	goplugin "github.com/hashicorp/go-plugin"
+
 	sdk "github.com/hashicorp/sentinel-sdk"
 )
 

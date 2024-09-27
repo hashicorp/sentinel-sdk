@@ -11,10 +11,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	"golang.org/x/net/context"
+
 	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
 	proto "github.com/hashicorp/sentinel-sdk/proto/go"
-	"golang.org/x/net/context"
 )
 
 // PluginGRPCServer is a gRPC server for Plugins.
