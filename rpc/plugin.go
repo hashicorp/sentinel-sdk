@@ -6,10 +6,12 @@ package rpc
 import (
 	"context"
 
+	"google.golang.org/grpc"
+
 	goplugin "github.com/hashicorp/go-plugin"
+
 	sdk "github.com/hashicorp/sentinel-sdk"
 	proto "github.com/hashicorp/sentinel-sdk/proto/go"
-	"google.golang.org/grpc"
 )
 
 // Plugin is the goplugin.Plugin implementation to serve sdk.Plugin.

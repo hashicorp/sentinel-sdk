@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"math"
 
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+
 	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/hashicorp/sentinel-sdk/encoding"
 	proto "github.com/hashicorp/sentinel-sdk/proto/go"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 )
 
 // PluginGRPCClient is a gRPC server for Plugins.

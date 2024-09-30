@@ -7,8 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	sdk "github.com/hashicorp/sentinel-sdk"
 	"github.com/stretchr/testify/mock"
+
+	sdk "github.com/hashicorp/sentinel-sdk"
 )
 
 func TestPlugin_gRPC_configure(t *testing.T) {
