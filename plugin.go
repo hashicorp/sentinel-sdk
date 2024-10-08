@@ -9,6 +9,7 @@
 package sdk
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -25,6 +26,10 @@ var (
 	// By making this a return value, it will convert to null.
 	Null = &null{}
 )
+
+// MarshalJSON provides custom marshalling logic to the encoding/json
+// package, allowing for the null type to be marshalled as nil
+func (*null) MarshalJSON() ([]byte, error) { return json.Marshal(nil) }
 
 //go:generate rm -f mock_Plugin.go mock_Plugin_Closer.go
 //go:generate mockery --inpackage --note "Generated code. DO NOT MODIFY." --name=Plugin
