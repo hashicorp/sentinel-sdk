@@ -4,6 +4,8 @@
 package sdk
 
 import (
+	"bytes"
+	"encoding/json"
 	"reflect"
 	"testing"
 )
@@ -39,5 +41,16 @@ func TestGetResultListKeyId(t *testing.T) {
 				t.Fatalf("expected %#v, got %#v", tc.Expected, actual)
 			}
 		})
+	}
+}
+
+func Test_Null_MarshalJSON(t *testing.T) {
+	res, err := json.Marshal(Null)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal(res, []byte("null")) {
+		t.Fatalf("unexpected response, marshal of Null should be \"null\", got %q", string(res))
 	}
 }
