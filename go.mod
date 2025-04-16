@@ -5,7 +5,7 @@ require (
 	github.com/kr/pretty v0.1.0
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.36.5
 )
