@@ -1,6 +1,9 @@
 //config: {"suffix": " world"}
 //error: hello world!
 
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 main = rule {
     error(subject.hello + exclamation)
 }
