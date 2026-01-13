@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2017, 2025
 // SPDX-License-Identifier: MPL-2.0
 
 // Package sdk contains the low-level interfaces and API for creating Sentinel
