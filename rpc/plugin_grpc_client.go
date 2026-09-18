@@ -15,7 +15,7 @@ import (
 	proto "github.com/hashicorp/sentinel-sdk/proto/go"
 )
 
-// PluginGRPCClient is a gRPC server for Plugins.
+// PluginGRPCClient is a gRPC client for Plugins.
 type PluginGRPCClient struct {
 	Client proto.PluginClient
 

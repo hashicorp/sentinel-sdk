@@ -27,7 +27,7 @@ func ValueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 
 func valueToGo(v *proto.Value, t reflect.Type) (interface{}, error) {
 	// t == nil if you call reflect.TypeOf(interface{}{}) or
-	// if the user explicitly send in nil which we make to mean
+	// if the user explicitly sent in nil which we make to mean
 	// the same thing.
 	kind := reflect.Interface
 	if t != nil {
