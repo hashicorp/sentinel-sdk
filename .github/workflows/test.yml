@@ -36,7 +36,7 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
 
       - name: Install sentinel
-        uses: hashicorp/setup-sentinel@7ca61a3f25049e0e05048da83e926679468bcad0 # main
+        uses: hashicorp/setup-sentinel@a0166cf0515a402b679b47e71ee37ce51529fbdf # main
         with:
           version: ${{ env.SENTINEL_VERSION }}
 
