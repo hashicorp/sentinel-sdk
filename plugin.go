@@ -48,7 +48,7 @@ type Plugin interface {
 	// This must be called before any call to Get().
 	Configure(map[string]interface{}) error
 
-	// Get is called when an plugin field is accessed or called as a function.
+	// Get is called when a plugin field is accessed or called as a function.
 	//
 	// Get may request more than one value at a time, represented by multiple
 	// GetReq values. The result GetResult should contain the matching

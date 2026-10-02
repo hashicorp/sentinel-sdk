@@ -13,7 +13,7 @@ package framework
 // identifier itself represents the plugin root.
 //
 // The root of a plugin is configurable and is able to return the actual
-// interfaces uses for value retrieval. The root itself can never contain
+// interfaces used for value retrieval. The root itself can never contain
 // a value, be callable, return all mappings, etc.
 //
 // A single root implementation and instance may be shared by many policy
@@ -97,7 +97,7 @@ type New interface {
 // a complete mapping.
 type Namespace interface {
 	// Get requests the value for a specific key. This must return a value
-	// convertable by lang/object.ToObject or another Interface value.
+	// convertible by lang/object.ToObject or another Interface value.
 	//
 	// If the value doesn't exist, nil should be returned. This will turn
 	// into "undefined" eventually in the Sentinel policy. If you want to
@@ -116,7 +116,7 @@ type Map interface {
 	Namespace
 
 	// Map returns the entire map for this value. The return value
-	// must only contain values convertable by lang/object.ToObject. It
+	// must only contain values convertible by lang/object.ToObject. It
 	// cannot contain functions or other framework interface implementations.
 	Map() (map[string]interface{}, error)
 }

@@ -5,7 +5,7 @@
 // Sentinel plugins with Go.
 //
 // The direct sdk.Plugin interface is a low-level interface that is
-// tediuos, clunky, and difficult to implement correctly. The
+// tedious, clunky, and difficult to implement correctly. The
 // interface is this way to assist in the performance of plugins
 // while executing Sentinel policies. This package provides a
 // high-level API that eases plugin implementation while still
